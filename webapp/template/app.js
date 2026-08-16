@@ -1,9 +1,14 @@
 async function main() {
-  const response = await fetch("data.json");
-  const listings = await response.json();
-  populateFonteOptions(listings);
-  render(listings);
-  document.getElementById("filters").addEventListener("input", () => render(listings));
+  try {
+    const response = await fetch("data.json");
+    const listings = await response.json();
+    populateFonteOptions(listings);
+    render(listings);
+    document.getElementById("filters").addEventListener("input", () => render(listings));
+  } catch (error) {
+    const container = document.getElementById("listings");
+    container.textContent = "Errore nel caricamento degli annunci";
+  }
 }
 
 function populateFonteOptions(listings) {
@@ -45,18 +50,49 @@ function applyFilters(listings) {
 function render(allListings) {
   const filtered = applyFilters(allListings);
   const container = document.getElementById("listings");
-  container.innerHTML = filtered
-    .map(
-      (l) => `
-      <div class="card">
-        <h3><a href="${l.url}" target="_blank" rel="noopener">${l.titolo}</a></h3>
-        <p>${l.tipo} — ${l.prezzo}€ — ${l.comune || ""} — ${l.fonte}</p>
-        <p>${l.superficie_mq ? l.superficie_mq + " mq" : ""} ${l.arredato !== "non_specificato" ? "· arredato: " + l.arredato : ""}</p>
-      </div>`
-    )
-    .join("");
+  container.innerHTML = "";
+
   if (filtered.length === 0) {
-    container.innerHTML = "<p>Nessun annuncio corrisponde ai filtri.</p>";
+    const p = document.createElement("p");
+    p.textContent = "Nessun annuncio corrisponde ai filtri.";
+    container.appendChild(p);
+    return;
+  }
+
+  for (const l of filtered) {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const h3 = document.createElement("h3");
+    const a = document.createElement("a");
+    a.target = "_blank";
+    a.rel = "noopener";
+    a.textContent = l.titolo;
+    if (l.url && (l.url.startsWith("http://") || l.url.startsWith("https://"))) {
+      a.href = l.url;
+    } else {
+      a.href = "#";
+    }
+    h3.appendChild(a);
+    card.appendChild(h3);
+
+    const p1 = document.createElement("p");
+    const tipoText = l.tipo || "";
+    const prezzoText = l.prezzo ? l.prezzo + "€" : "";
+    const comuneText = l.comune || "";
+    const fonteText = l.fonte || "";
+    const parts = [tipoText, prezzoText, comuneText, fonteText].filter(s => s);
+    p1.textContent = parts.join(" — ");
+    card.appendChild(p1);
+
+    const p2 = document.createElement("p");
+    const mqText = l.superficie_mq ? l.superficie_mq + " mq" : "";
+    const arredatoText = l.arredato && l.arredato !== "non_specificato" ? "· arredato: " + l.arredato : "";
+    const detailParts = [mqText, arredatoText].filter(s => s);
+    p2.textContent = detailParts.join(" ");
+    card.appendChild(p2);
+
+    container.appendChild(card);
   }
 }
 

@@ -6,7 +6,12 @@ from scraper import db
 from scraper.radius import within_radius
 
 def load_config(config_path: str) -> dict:
-    return yaml.safe_load(Path(config_path).read_text())
+    try:
+        return yaml.safe_load(Path(config_path).read_text())
+    except yaml.YAMLError as e:
+        raise ValueError(f"Invalid YAML in config {config_path}: {e}") from e
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Config file not found: {config_path}") from None
 
 def filter_listings(listings: list[dict], center_lat: float, center_lon: float, radius_km: float) -> list[dict]:
     return [
