@@ -45,11 +45,12 @@ def test_parse_listings_extracts_expected_fields(monkeypatch):
     assert first.url.startswith("http")
 
 
-def test_parse_listings_parses_a_real_price():
+def test_parse_listings_parses_a_real_price(monkeypatch):
     # Nella fixture reale il primo annuncio non mostra un prezzo (annuncio
     # senza prezzo visibile), ma altri annunci si': verifica che il parsing
     # del prezzo funzioni correttamente su un annuncio che lo mostra
     # (secondo annuncio della fixture, "850 €").
+    monkeypatch.setattr(subito_module, "geocode_fn", lambda comune: (43.5, 13.2))
     html = FIXTURE.read_text(encoding="utf-8")
     listings = parse_listings(html)
     assert any(l.prezzo == 850 for l in listings)
