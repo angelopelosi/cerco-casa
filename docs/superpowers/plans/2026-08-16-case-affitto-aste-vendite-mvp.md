@@ -1062,7 +1062,9 @@ git commit -m "feat: add Portale Vendite Pubbliche giustizia scraper"
 
 **Interfaces:**
 - Consumes: `db.connect/upsert_listing/mark_stale_as_removed` (Task 3), `fetch_html` (Task 6), `subito.build_search_url/parse_listings/WAIT_SELECTOR` (Task 7), `pvp_giustizia.build_search_url/parse_listings/WAIT_SELECTOR` (Task 8)
-- Produces: `PORTAL_MODULES: dict[str, module]`, `run_all(config: dict, db_path: str) -> None`. Used by `scripts/daily.py` (Task 13).
+- Produces: `PORTAL_MODULES: dict[str, module]`, `PORTAL_TIPI: dict[str, tuple[str, ...]]`, `run_all(config: dict, db_path: str) -> None`. Used by `scripts/daily.py` (Task 13).
+
+**Note — Task 7 changed `subito.build_search_url`'s signature.** It became `build_search_url(centro_nome: str, tipo: str = "affitto") -> str` because Subito has no single URL that mixes affitto and vendita listings (confirmed against the live site). `pvp_giustizia.build_search_url(centro_nome: str) -> str` keeps the single-argument form — auctions have no affitto/vendita split. `run_all` below fetches once per tipo for portals that need it (looked up in `PORTAL_TIPI`) and once otherwise, accumulating `seen_ids` across all of a portal's fetches before calling `mark_stale_as_removed` — calling it after each individual fetch would wrongly mark the other tipo's listings stale.
 
 - [ ] **Step 1: Write failing test**
 
@@ -1092,6 +1094,28 @@ def test_run_all_upserts_listings_from_active_portals(tmp_path, monkeypatch):
     active = db.get_active(conn)
     assert len(active) == 1
     assert active[0]["fonte"] == "subito"
+
+def test_run_all_fetches_subito_once_per_tipo(tmp_path, monkeypatch):
+    db_path = str(tmp_path / "test.db")
+    fetched_urls = []
+
+    def fake_fetch(url, wait_selector=None, **kwargs):
+        fetched_urls.append(url)
+        return FAKE_HTML
+
+    monkeypatch.setattr(run_all_module, "fetch_html", fake_fetch)
+    monkeypatch.setattr(run_all_module.subito, "parse_listings", lambda html: [])
+    monkeypatch.setattr(run_all_module.pvp_giustizia, "parse_listings", lambda html: [])
+
+    config = {"portali_attivi": ["subito", "pvp_giustizia"], "centro": {"nome": "Jesi"}}
+    run_all_module.run_all(config, db_path)
+
+    expected_subito_urls = {
+        run_all_module.subito.build_search_url("Jesi", tipo="affitto"),
+        run_all_module.subito.build_search_url("Jesi", tipo="vendita"),
+    }
+    assert expected_subito_urls.issubset(set(fetched_urls))
+    assert len(fetched_urls) == 3  # 2 subito (affitto+vendita) + 1 pvp_giustizia
 
 def test_run_all_skips_unregistered_portals(tmp_path, monkeypatch, capsys):
     db_path = str(tmp_path / "test.db")
@@ -1141,6 +1165,19 @@ PORTAL_MODULES = {
     "pvp_giustizia": pvp_giustizia,
 }
 
+# Portali la cui unica ricerca non copre sia affitto che vendita: una fetch
+# per tipo. Assente dal dict = una singola fetch (es. pvp_giustizia, dove
+# tipo e sempre "asta").
+PORTAL_TIPI = {
+    "subito": ("affitto", "vendita"),
+}
+
+def _search_urls(module, portale: str, centro_nome: str) -> list[str]:
+    tipi = PORTAL_TIPI.get(portale)
+    if tipi:
+        return [module.build_search_url(centro_nome, tipo=t) for t in tipi]
+    return [module.build_search_url(centro_nome)]
+
 def run_all(config: dict, db_path: str) -> None:
     conn = db.connect(db_path)
     for portale in config["portali_attivi"]:
@@ -1148,20 +1185,19 @@ def run_all(config: dict, db_path: str) -> None:
         if module is None:
             print(f"scraper non ancora implementato: {portale}, skip")
             continue
-        url = module.build_search_url(config["centro"]["nome"])
-        html = fetch_html(url, wait_selector=module.WAIT_SELECTOR)
-        listings = module.parse_listings(html)
         seen_ids = set()
-        for listing in listings:
-            db.upsert_listing(conn, listing)
-            seen_ids.add(listing.id)
+        for url in _search_urls(module, portale, config["centro"]["nome"]):
+            html = fetch_html(url, wait_selector=module.WAIT_SELECTOR)
+            for listing in module.parse_listings(html):
+                db.upsert_listing(conn, listing)
+                seen_ids.add(listing.id)
         db.mark_stale_as_removed(conn, portale, seen_ids)
 ```
 
 - [ ] **Step 4: Run test, verify it passes**
 
 Run: `pytest tests/test_run_all.py -v`
-Expected: PASS (3 tests)
+Expected: PASS (4 tests)
 
 - [ ] **Step 5: Commit**
 
