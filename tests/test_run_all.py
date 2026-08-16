@@ -1,0 +1,78 @@
+# tests/test_run_all.py
+from scraper import run_all as run_all_module, db
+from scraper.schema import Listing
+
+FAKE_HTML = "<html><body>irrelevant, fetch_html is mocked out</body></html>"
+
+def test_run_all_upserts_listings_from_active_portals(tmp_path, monkeypatch):
+    db_path = str(tmp_path / "test.db")
+    fake_listings = [
+        Listing(
+            fonte="subito", external_id="1", tipo="affitto",
+            titolo="Bilocale", prezzo=500, url="https://example.com/1",
+        )
+    ]
+    monkeypatch.setattr(run_all_module, "fetch_html", lambda *a, **k: FAKE_HTML)
+    monkeypatch.setattr(run_all_module.subito, "parse_listings", lambda html: fake_listings)
+    monkeypatch.setattr(run_all_module.pvp_giustizia, "parse_listings", lambda html: [])
+
+    config = {"portali_attivi": ["subito", "pvp_giustizia"], "centro": {"nome": "Jesi"}}
+    run_all_module.run_all(config, db_path)
+
+    conn = db.connect(db_path)
+    active = db.get_active(conn)
+    assert len(active) == 1
+    assert active[0]["fonte"] == "subito"
+
+def test_run_all_fetches_subito_once_per_tipo(tmp_path, monkeypatch):
+    db_path = str(tmp_path / "test.db")
+    fetched_urls = []
+
+    def fake_fetch(url, wait_selector=None, **kwargs):
+        fetched_urls.append(url)
+        return FAKE_HTML
+
+    monkeypatch.setattr(run_all_module, "fetch_html", fake_fetch)
+    monkeypatch.setattr(run_all_module.subito, "parse_listings", lambda html: [])
+    monkeypatch.setattr(run_all_module.pvp_giustizia, "parse_listings", lambda html: [])
+
+    config = {"portali_attivi": ["subito", "pvp_giustizia"], "centro": {"nome": "Jesi"}}
+    run_all_module.run_all(config, db_path)
+
+    expected_subito_urls = {
+        run_all_module.subito.build_search_url("Jesi", tipo="affitto"),
+        run_all_module.subito.build_search_url("Jesi", tipo="vendita"),
+    }
+    assert expected_subito_urls.issubset(set(fetched_urls))
+    assert len(fetched_urls) == 3  # 2 subito (affitto+vendita) + 1 pvp_giustizia
+
+def test_run_all_skips_unregistered_portals(tmp_path, monkeypatch, capsys):
+    db_path = str(tmp_path / "test.db")
+    monkeypatch.setattr(run_all_module, "fetch_html", lambda *a, **k: FAKE_HTML)
+    monkeypatch.setattr(run_all_module.subito, "parse_listings", lambda html: [])
+    monkeypatch.setattr(run_all_module.pvp_giustizia, "parse_listings", lambda html: [])
+
+    config = {"portali_attivi": ["immobiliare"], "centro": {"nome": "Jesi"}}
+    run_all_module.run_all(config, db_path)
+
+    captured = capsys.readouterr()
+    assert "immobiliare" in captured.out
+
+def test_run_all_marks_previously_seen_listings_as_removed_when_absent(tmp_path, monkeypatch):
+    db_path = str(tmp_path / "test.db")
+    listing = Listing(fonte="subito", external_id="1", tipo="affitto",
+                       titolo="Bilocale", prezzo=500, url="https://example.com/1")
+
+    monkeypatch.setattr(run_all_module, "fetch_html", lambda *a, **k: FAKE_HTML)
+    monkeypatch.setattr(run_all_module.pvp_giustizia, "parse_listings", lambda html: [])
+
+    config = {"portali_attivi": ["subito", "pvp_giustizia"], "centro": {"nome": "Jesi"}}
+
+    monkeypatch.setattr(run_all_module.subito, "parse_listings", lambda html: [listing])
+    run_all_module.run_all(config, db_path)
+
+    monkeypatch.setattr(run_all_module.subito, "parse_listings", lambda html: [])
+    run_all_module.run_all(config, db_path)
+
+    conn = db.connect(db_path)
+    assert db.get_active(conn) == []
