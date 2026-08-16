@@ -1,0 +1,10 @@
+centro:
+  nome: "Jesi"
+  lat: 43.5219
+  lon: 13.2437
+raggio_km: 20
+portali_attivi:
+  - subito
+  - pvp_giustizia
+email:
+  destinatari: []

@@ -1,0 +1,8 @@
+data/*.db
+data/geocode_cache.json
+webapp/build/
+.env
+__pycache__/
+*.pyc
+.pytest_cache/
+venv/
