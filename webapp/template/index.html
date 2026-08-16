@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <title>Case Affitto Aste Vendite — Jesi</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <h1>Case, affitti e aste — zona Jesi</h1>
+  <form id="filters">
+    <select id="f-tipo">
+      <option value="">Tutti i tipi</option>
+      <option value="affitto">Affitto</option>
+      <option value="vendita">Vendita</option>
+      <option value="asta">Asta</option>
+    </select>
+    <input id="f-prezzo-min" type="number" placeholder="Prezzo min" />
+    <input id="f-prezzo-max" type="number" placeholder="Prezzo max" />
+    <input id="f-mq-min" type="number" placeholder="Mq min" />
+    <input id="f-mq-max" type="number" placeholder="Mq max" />
+    <input id="f-comune" type="text" placeholder="Comune" />
+    <select id="f-fonte">
+      <option value="">Tutte le fonti</option>
+    </select>
+    <select id="f-disponibilita">
+      <option value="">Disponibilita: tutte</option>
+      <option value="libero">Libero</option>
+      <option value="occupato">Occupato</option>
+    </select>
+    <select id="f-arredato">
+      <option value="">Arredato: tutti</option>
+      <option value="si">Si</option>
+      <option value="no">No</option>
+    </select>
+  </form>
+  <div id="listings"></div>
+  <script src="app.js"></script>
+</body>
+</html>
