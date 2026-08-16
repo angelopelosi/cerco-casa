@@ -20,4 +20,14 @@ configurabile (default Jesi). Sito statico pubblico + digest email settimanale.
 
 ## Task Scheduler (Windows)
 
-Vedi Task 13 del piano di implementazione per i comandi esatti.
+Crea due attivita programmate (Task Scheduler GUI o `schtasks`), entrambe con
+"Start in" impostato sulla cartella del progetto:
+
+Giornaliero (ogni giorno, es. 07:00):
+schtasks /create /tn "CaseAffittoAsteVendite-Daily" /tr "\"C:\path\to\venv\Scripts\pythonw.exe\" -m scripts.daily" /sc daily /st 07:00 /sd 01/01/2026
+
+Settimanale (ogni lunedi, dopo il job giornaliero, es. 08:00):
+schtasks /create /tn "CaseAffittoAsteVendite-Weekly" /tr "\"C:\path\to\venv\Scripts\pythonw.exe\" -m scripts.weekly" /sc weekly /d MON /st 08:00 /sd 01/01/2026
+
+Sostituisci `C:\path\to\venv` con il percorso reale del virtualenv creato nel
+Setup. Se il PC e spento all'orario schedulato, il job viene saltato quel giorno.
