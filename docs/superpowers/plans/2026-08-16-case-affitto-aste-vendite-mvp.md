@@ -492,7 +492,7 @@ git commit -m "feat: add SQLite storage layer with dedup and staleness tracking"
 - Test: `tests/test_geocode.py`
 
 **Interfaces:**
-- Produces: `geocode(query: str, cache_path: str) -> tuple[float, float]`, `GeocodeError` exception. Used by scrapers that need to resolve a `comune` name to lat/lon when the portal doesn't provide coordinates directly.
+- Produces: `geocode(query: str, cache_path: str) -> tuple[float, float]`, `GeocodeError` exception. **Required by** `scraper/subito.py` and `scraper/pvp_giustizia.py` (Tasks 7-8): each scraper must call this to resolve the comune it extracts from a listing card into `lat`/`lon` on the `Listing`. Without this wiring, every listing has `lat=lon=None` and `webapp/generate.py`'s `filter_listings` (Task 10) — which excludes any listing with missing coordinates — silently drops everything. Task 7 and Task 8 each import `geocode` as `geocode_fn` so tests can monkeypatch it (no network calls in tests, per Global Constraints).
 
 - [ ] **Step 1: Write failing test**
 
@@ -759,7 +759,7 @@ git commit -m "feat: add Playwright-based HTML fetcher"
 - Test: `tests/test_subito.py`
 
 **Interfaces:**
-- Consumes: `Listing` (Task 2)
+- Consumes: `Listing` (Task 2), `geocode` from `scraper/geocode.py` (Task 4) — imported as `geocode_fn` so it stays monkeypatchable in tests
 - Produces: `build_search_url(centro_nome: str) -> str`, `parse_listings(html: str) -> list[Listing]`, `WAIT_SELECTOR: str`. Registered in `scraper/run_all.py` (Task 9) as `PORTAL_MODULES["subito"]`.
 
 - [ ] **Step 1: Capture a real fixture**
@@ -775,6 +775,7 @@ Open `fixtures/subito_sample.html`, use devtools "Inspect" on a few listing card
 ```python
 # tests/test_subito.py
 from pathlib import Path
+import scraper.subito as subito_module
 from scraper.subito import parse_listings, build_search_url
 
 FIXTURE = Path(__file__).parent.parent / "fixtures" / "subito_sample.html"
@@ -784,7 +785,8 @@ def test_build_search_url_includes_centro_nome():
     assert "subito.it" in url
     assert "Jesi" in url or "jesi" in url.lower()
 
-def test_parse_listings_extracts_expected_fields():
+def test_parse_listings_extracts_expected_fields(monkeypatch):
+    monkeypatch.setattr(subito_module, "geocode_fn", lambda comune: (43.5, 13.2))
     html = FIXTURE.read_text(encoding="utf-8")
     listings = parse_listings(html)
     assert len(listings) > 0
@@ -797,7 +799,21 @@ def test_parse_listings_extracts_expected_fields():
     assert isinstance(first.prezzo, int) and first.prezzo >= 0
     assert first.url.startswith("http")
 
-def test_parse_listings_returns_empty_list_for_no_matches():
+def test_parse_listings_geocodes_comune_when_present(monkeypatch):
+    calls = []
+    def fake_geocode(comune):
+        calls.append(comune)
+        return (43.5, 13.2)
+    monkeypatch.setattr(subito_module, "geocode_fn", fake_geocode)
+    html = FIXTURE.read_text(encoding="utf-8")
+    listings = parse_listings(html)
+    assert len(listings) > 0
+    if calls:  # solo se la fixture reale espone un comune per la card
+        assert listings[0].lat == 43.5
+        assert listings[0].lon == 13.2
+
+def test_parse_listings_returns_empty_list_for_no_matches(monkeypatch):
+    monkeypatch.setattr(subito_module, "geocode_fn", lambda comune: (43.5, 13.2))
     assert parse_listings("<html><body>nessun annuncio</body></html>") == []
 ```
 
@@ -812,6 +828,7 @@ Expected: FAIL with `ModuleNotFoundError: No module named 'scraper.subito'`
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from .schema import Listing
+from .geocode import geocode as geocode_fn, GeocodeError
 
 WAIT_SELECTOR = "body"
 
@@ -820,6 +837,7 @@ SELECTOR_CARD = "[data-testid='item-card']"
 SELECTOR_TITLE = "h2"
 SELECTOR_PRICE = "[data-testid='price']"
 SELECTOR_LINK = "a"
+SELECTOR_COMUNE = "[data-testid='location']"
 
 def build_search_url(centro_nome: str) -> str:
     # NOTA: URL di partenza, cerca genericamente su tutta la categoria immobili
@@ -841,6 +859,16 @@ def parse_listings(html: str) -> list[Listing]:
         href = link_el["href"]
         url = href if href.startswith("http") else f"https://www.subito.it{href}"
         external_id = url.rstrip("/").split("/")[-1]
+
+        comune_el = card.select_one(SELECTOR_COMUNE)
+        comune = comune_el.get_text(strip=True) if comune_el else None
+        lat = lon = None
+        if comune:
+            try:
+                lat, lon = geocode_fn(comune)
+            except GeocodeError:
+                pass
+
         listings.append(Listing(
             fonte="subito",
             external_id=external_id,
@@ -848,6 +876,9 @@ def parse_listings(html: str) -> list[Listing]:
             titolo=title_el.get_text(strip=True),
             prezzo=_parse_price(price_el.get_text(strip=True) if price_el else ""),
             url=url,
+            comune=comune,
+            lat=lat,
+            lon=lon,
         ))
     return listings
 
@@ -878,7 +909,7 @@ git commit -m "feat: add Subito.it scraper"
 - Test: `tests/test_pvp_giustizia.py`
 
 **Interfaces:**
-- Consumes: `Listing` (Task 2)
+- Consumes: `Listing` (Task 2), `geocode` from `scraper/geocode.py` (Task 4) — imported as `geocode_fn` so it stays monkeypatchable in tests
 - Produces: `build_search_url(centro_nome: str) -> str`, `parse_listings(html: str) -> list[Listing]`, `WAIT_SELECTOR: str`. Registered in `scraper/run_all.py` (Task 9) as `PORTAL_MODULES["pvp_giustizia"]`.
 
 - [ ] **Step 1: Capture a real fixture**
@@ -894,6 +925,7 @@ Same process as Task 7 Step 2: find the listing/lotto container selector and the
 ```python
 # tests/test_pvp_giustizia.py
 from pathlib import Path
+import scraper.pvp_giustizia as pvp_module
 from scraper.pvp_giustizia import parse_listings, build_search_url
 
 FIXTURE = Path(__file__).parent.parent / "fixtures" / "pvp_giustizia_sample.html"
@@ -903,7 +935,8 @@ def test_build_search_url_includes_centro_nome():
     assert "giustizia.it" in url
     assert "Jesi" in url or "jesi" in url.lower()
 
-def test_parse_listings_extracts_expected_fields():
+def test_parse_listings_extracts_expected_fields(monkeypatch):
+    monkeypatch.setattr(pvp_module, "geocode_fn", lambda comune: (43.5, 13.2))
     html = FIXTURE.read_text(encoding="utf-8")
     listings = parse_listings(html)
     assert len(listings) > 0
@@ -916,7 +949,21 @@ def test_parse_listings_extracts_expected_fields():
     assert isinstance(first.prezzo, int) and first.prezzo >= 0
     assert first.url.startswith("http")
 
-def test_parse_listings_returns_empty_list_for_no_matches():
+def test_parse_listings_geocodes_comune_when_present(monkeypatch):
+    calls = []
+    def fake_geocode(comune):
+        calls.append(comune)
+        return (43.5, 13.2)
+    monkeypatch.setattr(pvp_module, "geocode_fn", fake_geocode)
+    html = FIXTURE.read_text(encoding="utf-8")
+    listings = parse_listings(html)
+    assert len(listings) > 0
+    if calls:  # solo se la fixture reale espone un comune per il lotto
+        assert listings[0].lat == 43.5
+        assert listings[0].lon == 13.2
+
+def test_parse_listings_returns_empty_list_for_no_matches(monkeypatch):
+    monkeypatch.setattr(pvp_module, "geocode_fn", lambda comune: (43.5, 13.2))
     assert parse_listings("<html><body>nessuna asta</body></html>") == []
 ```
 
@@ -931,6 +978,7 @@ Expected: FAIL with `ModuleNotFoundError: No module named 'scraper.pvp_giustizia
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from .schema import Listing
+from .geocode import geocode as geocode_fn, GeocodeError
 
 WAIT_SELECTOR = "body"
 
@@ -940,6 +988,7 @@ SELECTOR_TITLE = ".titolo-annuncio"
 SELECTOR_PRICE = ".prezzo-base"
 SELECTOR_TRIBUNALE = ".tribunale"
 SELECTOR_DATA_ASTA = ".data-asta"
+SELECTOR_COMUNE = ".comune"
 SELECTOR_LINK = "a"
 
 def build_search_url(centro_nome: str) -> str:
@@ -960,6 +1009,16 @@ def parse_listings(html: str) -> list[Listing]:
         external_id = url.rstrip("/").split("/")[-1]
         tribunale_el = card.select_one(SELECTOR_TRIBUNALE)
         data_asta_el = card.select_one(SELECTOR_DATA_ASTA)
+
+        comune_el = card.select_one(SELECTOR_COMUNE)
+        comune = comune_el.get_text(strip=True) if comune_el else None
+        lat = lon = None
+        if comune:
+            try:
+                lat, lon = geocode_fn(comune)
+            except GeocodeError:
+                pass
+
         listings.append(Listing(
             fonte="pvp_giustizia",
             external_id=external_id,
@@ -967,6 +1026,9 @@ def parse_listings(html: str) -> list[Listing]:
             titolo=title_el.get_text(strip=True),
             prezzo=_parse_price(price_el.get_text(strip=True) if price_el else ""),
             url=url,
+            comune=comune,
+            lat=lat,
+            lon=lon,
             tribunale=tribunale_el.get_text(strip=True) if tribunale_el else None,
             data_asta=data_asta_el.get_text(strip=True) if data_asta_el else None,
             offerta_minima=_parse_price(price_el.get_text(strip=True) if price_el else ""),
