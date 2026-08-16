@@ -36,3 +36,23 @@ def test_send_digest_sends_via_smtp(monkeypatch):
     digest.send_digest("user@example.com", "pw", ["dest@example.com"], "<html></html>")
     assert sent["login"] == ("user@example.com", "pw")
     assert sent["sendmail"][1] == ["dest@example.com"]
+
+def test_build_digest_html_escapes_html_special_characters(tmp_path):
+    template_path = tmp_path / "template.html"
+    template_path.write_text(TEMPLATE)
+    listings = [
+        {
+            "titolo": 'Bilocale <script>alert(1)</script>',
+            "comune": 'Jesi & Roma',
+            "prezzo": 500,
+            "fonte": 'subito"malicious',
+            "url": 'https://example.com/1?param="inject"'
+        }
+    ]
+    html = digest.build_digest_html(listings, template_path=str(template_path))
+    # Verify that HTML special chars are escaped, not raw
+    assert "<script>" not in html, "Script tags should be escaped"
+    assert "&lt;script&gt;" in html, "Script tags should be HTML-escaped"
+    assert "Jesi &amp; Roma" in html, "Ampersands should be escaped"
+    assert "subito&quot;malicious" in html, "Quotes should be escaped"
+    assert "param=&quot;inject&quot;" in html, "URL quotes should be escaped"

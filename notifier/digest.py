@@ -3,6 +3,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import date, timedelta
 from pathlib import Path
+from html import escape
 from scraper import db
 
 def build_digest_html(listings: list[dict], template_path: str = "notifier/email_template.html") -> str:
@@ -11,7 +12,7 @@ def build_digest_html(listings: list[dict], template_path: str = "notifier/email
         rows = "<p>Nessun nuovo annuncio questa settimana.</p>"
     else:
         rows = "".join(
-            f'<li><a href="{l["url"]}">{l["titolo"]}</a> — {l["comune"]}, {l["prezzo"]}€ ({l["fonte"]})</li>'
+            f'<li><a href="{escape(l["url"])}">{escape(l["titolo"])}</a> — {escape(l["comune"])}, {l["prezzo"]}€ ({escape(l["fonte"])})</li>'
             for l in listings
         )
     return template.replace("{{LISTINGS}}", rows).replace("{{COUNT}}", str(len(listings)))
