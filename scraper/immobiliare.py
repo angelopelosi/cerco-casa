@@ -4,19 +4,26 @@ from bs4 import BeautifulSoup
 from .schema import Listing
 from .geocode import geocode as geocode_fn, GeocodeError
 
-# ATTENZIONE — Task 8, Step 0 (verifica fattibilita' anti-bot): il fetch di
-# verifica (Playwright headless, fetch normale, nessuna evasione tentata) su
-# https://www.immobiliare.it/affitto-case/jesi/ ha restituito una pagina di
-# blocco DataDome CAPTCHA (non risultati reali) — vedi
+# ATTENZIONE — anti-bot: un fetch di verifica (Playwright headless, poi
+# anche headed/non-headless, nessuna evasione tentata in nessuno dei due
+# casi) su https://www.immobiliare.it/affitto-case/jesi/ ha restituito in
+# entrambi i casi una pagina di blocco DataDome (CAPTCHA in headless, pagina
+# di verifica JS in headed — body con solo 14 caratteri di testo, nessun
+# annuncio reale) — vedi
 # docs/superpowers/reports/task-8-immobiliare-antibot-report.md per
-# l'evidenza completa. Di conseguenza NON e' stato possibile catturare una
-# fixture reale ne' verificare i selettori sotto contro il markup reale del
-# sito. I test di questo modulo girano contro
-# fixtures/immobiliare_synthetic.html, una fixture costruita a mano (non
-# scaricata) — vedi commento in testa a quel file e a tests/test_immobiliare.py.
-# Questo modulo NON e' registrato in portali_attivi/PORTAL_TIPI/PORTAL_MODULES:
-# la Task 11 deve saltarlo finche' non ci sara' una riverifica manuale
-# dell'accesso al sito.
+# l'evidenza completa. Questo modulo quindi NON fa parte della pipeline
+# automatica giornaliera (non e' in portali_attivi/PORTAL_TIPI di
+# config.yaml/run_all.py) e non ci si prova ad aggirare l'anti-bot (niente
+# proxy/fingerprint spoofing/captcha-solver).
+#
+# Percorso valido invece: cattura manuale. L'utente apre la ricerca nel
+# proprio browser vero (navigazione umana reale, DataDome non la blocca) via
+# scripts/apri_ricerche_manuali.py, salva la pagina, e
+# scripts/importa_ricerche_manuali.py chiama parse_listings() su quel file
+# salvato. I selettori sotto restano NON VERIFICATI contro markup reale
+# finche' non arriva la prima pagina salvata per davvero — i test di questo
+# modulo girano nel frattempo contro fixtures/immobiliare_synthetic.html
+# (fixture costruita a mano, non scaricata).
 
 WAIT_SELECTOR = "body"
 
@@ -46,27 +53,51 @@ SELECTOR_PRICE = ".in-price"
 SELECTOR_COMUNE = ".in-card__location"
 SELECTOR_LINK = "a"
 
+# NON VERIFICATO — selettori aggiuntivi per le card di "aste-immobiliari"
+# (sezione distinta dagli annunci normali, aggiunta senza aver mai visto
+# markup reale: nessuna fixture, nemmeno sintetica, la copre ancora).
+# Ragionevole prima ipotesi per analogia con gli altri scraper di aste di
+# questo progetto (astegiudiziarie.py/asteimmobili.py) — da correggere non
+# appena arriva la prima pagina "aste-immobiliari" salvata per davvero.
+SELECTOR_TRIBUNALE = ".in-auction__court, .in-card__court"
+SELECTOR_DATA_ASTA = ".in-auction__date, .in-card__auctionDate"
+
 
 def build_search_url(centro_nome: str, tipo: str = "affitto") -> str:
     """Costruisce l'URL di ricerca Immobiliare.it per un comune e un tipo di annuncio.
 
-    NON VERIFICATO end-to-end: e' lo stesso URL (per centro_nome="Jesi",
-    tipo="affitto") usato per il fetch di verifica fattibilita' dello
-    Step 0, che e' stato bloccato da un CAPTCHA anti-bot prima di poter
-    confermare se la pagina di risultati raggiunta sia effettivamente
-    corretta. Come Subito.it in Fase 1, Immobiliare.it separa affitto e
-    vendita come path distinti (bozza del brief, non confermato dal sito
-    reale).
+    Pattern affitto/vendita fornito dall'utente e verificato reale (non piu'
+    bozza): https://www.immobiliare.it/vendita-case/jesi/,
+    .../affitto-case/jesi/ — Immobiliare.it separa affitto e vendita come
+    path distinti, confermato.
+
+    Pattern asta fornito dall'utente e verificato reale (URL, non il
+    markup dei risultati): https://www.immobiliare.it/aste-immobiliari/jesi/
+    — nota la forma diversa (niente suffisso "-case"), sezione separata dagli
+    annunci normali.
     """
-    if tipo not in ("affitto", "vendita"):
+    if tipo not in ("affitto", "vendita", "asta"):
         raise ValueError(f"tipo non valido per immobiliare: {tipo}")
     slug = quote(centro_nome.lower())
+    if tipo == "asta":
+        return f"https://www.immobiliare.it/aste-immobiliari/{slug}/"
     return f"https://www.immobiliare.it/{tipo}-case/{slug}/"
 
 
-def parse_listings(html: str) -> list[Listing]:
+def parse_listings(html: str, tipo: str | None = None) -> list[Listing]:
+    """Estrae gli annunci da una pagina di ricerca Immobiliare.it salvata.
+
+    Se `tipo` e' passato esplicitamente (percorso di importazione manuale,
+    dove sappiamo gia' da quale ricerca proviene la pagina salvata) viene
+    usato direttamente, piu' affidabile del riconoscimento automatico dal
+    contenuto della pagina (mai verificato contro markup reale, e comunque
+    incapace di riconoscere "asta" — non ha mai visto una pagina aste reale).
+    """
     soup = BeautifulSoup(html, "html.parser")
-    tipo = _detect_tipo(soup)
+    if tipo is None:
+        tipo = _detect_tipo(soup)
+    elif tipo not in ("affitto", "vendita", "asta"):
+        raise ValueError(f"tipo non valido per immobiliare: {tipo}")
     listings = []
     for card in soup.select(SELECTOR_CARD):
         title_el = card.select_one(SELECTOR_TITLE)
@@ -86,20 +117,33 @@ def parse_listings(html: str) -> list[Listing]:
             except (GeocodeError, requests.RequestException):
                 pass
 
+        prezzo = _parse_price(price_el.get_text(strip=True) if price_el else "")
+
+        tribunale = data_asta = offerta_minima = None
+        if tipo == "asta":
+            tribunale_el = card.select_one(SELECTOR_TRIBUNALE)
+            data_asta_el = card.select_one(SELECTOR_DATA_ASTA)
+            tribunale = tribunale_el.get_text(strip=True) if tribunale_el else None
+            data_asta = data_asta_el.get_text(strip=True) if data_asta_el else None
+            offerta_minima = None  # NON VERIFICATO: nessun dato reale per distinguerla dal prezzo base
+
         listings.append(Listing(
             fonte="immobiliare",
             external_id=external_id,
             tipo=tipo,
             titolo=title_el.get_text(strip=True),
-            prezzo=_parse_price(price_el.get_text(strip=True) if price_el else ""),
+            prezzo=prezzo,
             url=url,
             comune=comune,
             lat=lat,
             lon=lon,
+            tribunale=tribunale,
+            data_asta=data_asta,
+            offerta_minima=offerta_minima,
             # chi_vende volutamente non impostato (resta None, default dello
-            # schema): il brief chiede di verificare sul dato reale prima di
-            # assumere sempre "agenzia", ma lo Step 0 non ha permesso alcuna
-            # verifica — non si inventa il valore.
+            # schema): nessun dato reale ancora disponibile per verificare se
+            # e come Immobiliare.it espone un indicatore privato/agenzia —
+            # non si inventa il valore. Da rivedere sulla prima cattura reale.
         ))
     return listings
 

@@ -1,5 +1,6 @@
 centro:
   nome: "Jesi"
+  provincia: "Ancona"
   lat: 43.5219
   lon: 13.2437
 raggio_km: 20
@@ -15,13 +16,16 @@ portali_attivi:
   # unici da portaleaste, tutti gia' inclusi anche in astegiudiziarie. Il
   # modulo resta registrato in scraper/run_all.py's PORTAL_MODULES, solo
   # disattivato qui per evitare duplicati.
-  # immobiliare, idealista: NON attivi. Task 8/9 Step 0 ha rilevato un blocco
-  # anti-bot DataDome su entrambi (vedi scraper/immobiliare.py,
-  # scraper/idealista.py, docs/superpowers/reports/task-8-immobiliare-antibot-report.md,
-  # docs/superpowers/reports/task-9-idealista-antibot-report.md) — i moduli
-  # sono implementati e registrati in PORTAL_MODULES/PORTAL_TIPI ma contro
-  # fixture sintetiche, non verificate contro il markup reale. Aggiungere
-  # qui solo dopo una riverifica manuale dell'accesso al sito.
+  # immobiliare, idealista: NON attivi e NON attivabili qui. Bloccati da
+  # anti-bot DataDome (vedi scraper/immobiliare.py, scraper/idealista.py,
+  # docs/superpowers/reports/task-8-immobiliare-antibot-report.md,
+  # docs/superpowers/reports/task-9-idealista-antibot-report.md) — non fanno
+  # parte della pipeline automatica giornaliera (run_all/scripts.daily).
+  # Percorso separato, manuale: scripts/apri_ricerche_manuali.py apre le
+  # pagine di ricerca nel browser vero dell'utente (bypassa l'anti-bot: e'
+  # navigazione umana reale, non uno script), l'utente salva con Ctrl+S,
+  # poi scripts/importa_ricerche_manuali.py legge i file salvati e li importa
+  # nello stesso DB/sito degli altri portali.
 email:
   destinatari:
     - angelopelosi1995@gmail.com

@@ -67,7 +67,7 @@ def test_run_all_registers_all_phase2_portals():
     for nome in ("astegiudiziarie", "asteimmobili", "immobiliare", "idealista", "portaleaste"):
         assert nome in run_all_module.PORTAL_MODULES
 
-def test_run_all_fetches_immobiliare_and_idealista_once_per_tipo(tmp_path, monkeypatch):
+def test_run_all_fetches_immobiliare_once_per_tipo(tmp_path, monkeypatch):
     db_path = str(tmp_path / "test.db")
     fetched_urls = []
 
@@ -79,10 +79,29 @@ def test_run_all_fetches_immobiliare_and_idealista_once_per_tipo(tmp_path, monke
     for modulo in run_all_module.PORTAL_MODULES.values():
         monkeypatch.setattr(modulo, "parse_listings", lambda html: [])
 
-    config = {"portali_attivi": ["immobiliare", "idealista"], "centro": {"nome": "Jesi"}}
+    config = {"portali_attivi": ["immobiliare"], "centro": {"nome": "Jesi"}}
     run_all_module.run_all(config, db_path)
 
-    assert len(fetched_urls) == 4  # 2 tipi x 2 portali
+    assert len(fetched_urls) == 2  # 2 tipi (affitto/vendita) x 1 portale
+
+def test_run_all_idealista_fails_gracefully_missing_provincia(tmp_path, monkeypatch, capsys):
+    # idealista.build_search_url ora richiede `provincia` (percorso di
+    # importazione manuale, vedi scripts/importa_ricerche_manuali.py) —
+    # run_all/config.yaml non hanno un modo di fornirla per-portale, quindi
+    # idealista non puo' piu' girare tramite run_all: deliberato, non un
+    # difetto (idealista non fa parte della pipeline automatica). Verifica
+    # solo che l'errore venga isolato (Finding 4 della review finale) invece
+    # di far fallire l'intero run.
+    db_path = str(tmp_path / "test.db")
+    monkeypatch.setattr(run_all_module, "fetch_html", lambda *a, **k: FAKE_HTML)
+    monkeypatch.setattr(run_all_module.subito, "parse_listings", lambda html: [])
+
+    config = {"portali_attivi": ["idealista", "subito"], "centro": {"nome": "Jesi"}}
+    run_all_module.run_all(config, db_path)  # non deve sollevare
+
+    captured = capsys.readouterr()
+    assert "idealista" in captured.out
+    assert db.get_active(db.connect(db_path)) == []  # nessun crash, nessun dato spurio
 
 def test_run_all_marks_previously_seen_listings_as_removed_when_absent(tmp_path, monkeypatch):
     # Rimozione genuina: il portale continua a restituire risultati (seen_ids

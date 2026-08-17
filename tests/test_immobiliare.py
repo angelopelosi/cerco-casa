@@ -32,9 +32,15 @@ def test_build_search_url_accepts_tipo_and_changes_path():
     assert affitto_url != vendita_url
 
 
+def test_build_search_url_asta_matches_real_pattern_fornito_dall_utente():
+    # Pattern reale fornito dall'utente: niente suffisso "-case" per le aste,
+    # a differenza di affitto/vendita.
+    assert build_search_url("Jesi", tipo="asta") == "https://www.immobiliare.it/aste-immobiliari/jesi/"
+
+
 def test_build_search_url_rejects_invalid_tipo():
     try:
-        build_search_url("Jesi", tipo="asta")
+        build_search_url("Jesi", tipo="boh")
     except ValueError:
         pass
     else:
@@ -61,6 +67,42 @@ def test_parse_listings_extracts_expected_fields(monkeypatch):
 def test_parse_listings_returns_empty_list_for_no_matches(monkeypatch):
     monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
     assert parse_listings("<html><body>nessun annuncio</body></html>") == []
+
+
+def test_parse_listings_uses_explicit_tipo_when_given(monkeypatch):
+    # Percorso di importazione manuale: sappiamo gia' da quale ricerca
+    # proviene il file salvato, non serve indovinarlo dal contenuto pagina.
+    monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
+    html = FIXTURE.read_text(encoding="utf-8")
+    listings = parse_listings(html, tipo="vendita")
+    assert all(l.tipo == "vendita" for l in listings)
+
+
+def test_parse_listings_rejects_invalid_explicit_tipo(monkeypatch):
+    monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
+    html = FIXTURE.read_text(encoding="utf-8")
+    try:
+        parse_listings(html, tipo="boh")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("tipo non valido avrebbe dovuto sollevare ValueError")
+
+
+def test_parse_listings_asta_tipo_does_not_crash_without_auction_selectors(monkeypatch):
+    # La fixture sintetica simula annunci normali, non aste (nessuna pagina
+    # aste-immobiliari reale e' mai stata vista) — verifica solo che il
+    # percorso tipo="asta" non esploda quando i selettori NON VERIFICATI
+    # SELECTOR_TRIBUNALE/SELECTOR_DATA_ASTA non trovano nulla: deve degradare
+    # a None, non sollevare un'eccezione.
+    monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
+    html = FIXTURE.read_text(encoding="utf-8")
+    listings = parse_listings(html, tipo="asta")
+    assert len(listings) > 0
+    assert all(l.tipo == "asta" for l in listings)
+    assert all(l.tribunale is None for l in listings)
+    assert all(l.data_asta is None for l in listings)
+    assert all(l.offerta_minima is None for l in listings)
 
 
 def test_selector_card_matches_exactly_the_three_cards_not_child_classes():

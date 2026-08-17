@@ -4,22 +4,26 @@ from bs4 import BeautifulSoup
 from .schema import Listing
 from .geocode import geocode as geocode_fn, GeocodeError
 
-# ATTENZIONE — Task 9, Step 0 (verifica fattibilita' anti-bot): il fetch di
-# verifica (Playwright headless, fetch normale, nessuna evasione tentata) su
-# https://www.idealista.it/affitto-case/jesi-marche/ ha restituito una pagina
-# di blocco DataDome CAPTCHA (non risultati reali) — pagina di 1499 byte,
-# <title>idealista.it</title>, iframe title="DataDome CAPTCHA" verso
-# geo.captcha-delivery.com — vedi
-# docs/superpowers/reports/task-9-idealista-antibot-report.md per l'evidenza completa
-# (stesso schema di blocco riscontrato da Task 8 su immobiliare.it). Di
-# conseguenza NON e' stato possibile catturare una fixture reale ne'
-# verificare i selettori sotto contro il markup reale del sito. I test di
-# questo modulo girano contro fixtures/idealista_synthetic.html, una fixture
-# costruita a mano (non scaricata) — vedi commento in testa a quel file e a
-# tests/test_idealista.py.
-# Questo modulo NON e' registrato in portali_attivi/PORTAL_TIPI/PORTAL_MODULES:
-# la Task 11 deve saltarlo finche' non ci sara' una riverifica manuale
-# dell'accesso al sito.
+# ATTENZIONE — anti-bot: un fetch di verifica (Playwright headless, poi
+# anche headed/non-headless, nessuna evasione tentata in nessuno dei due
+# casi) su https://www.idealista.it/affitto-case/jesi-marche/ ha restituito
+# in entrambi i casi una pagina di blocco DataDome (CAPTCHA in headless,
+# pagina di verifica JS in headed — body con 14 caratteri di testo, nessun
+# annuncio reale) — vedi
+# docs/superpowers/reports/task-9-idealista-antibot-report.md per l'evidenza
+# completa. Questo modulo quindi NON fa parte della pipeline automatica
+# giornaliera (non e' in portali_attivi/PORTAL_TIPI di config.yaml/run_all.py)
+# e non ci si prova ad aggirare l'anti-bot (niente proxy/fingerprint
+# spoofing/captcha-solver).
+#
+# Percorso valido invece: cattura manuale. L'utente apre la ricerca nel
+# proprio browser vero (navigazione umana reale, DataDome non la blocca) via
+# scripts/apri_ricerche_manuali.py, salva la pagina, e
+# scripts/importa_ricerche_manuali.py chiama parse_listings() su quel file
+# salvato. I selettori sotto restano NON VERIFICATI contro markup reale
+# finche' non arriva la prima pagina salvata per davvero — i test di questo
+# modulo girano nel frattempo contro fixtures/idealista_synthetic.html
+# (fixture costruita a mano, non scaricata).
 
 WAIT_SELECTOR = "body"
 
@@ -41,27 +45,36 @@ SELECTOR_COMUNE = ".item-detail-char, .item-location"
 SELECTOR_LINK = "a.item-link"
 
 
-def build_search_url(centro_nome: str, tipo: str = "affitto") -> str:
-    """Costruisce l'URL di ricerca Idealista.it per un comune e un tipo di annuncio.
+def build_search_url(centro_nome: str, provincia: str, tipo: str = "affitto") -> str:
+    """Costruisce l'URL di ricerca Idealista.it per un comune+provincia e un tipo di annuncio.
 
-    NON VERIFICATO end-to-end: e' lo stesso URL (per centro_nome="Jesi",
-    tipo="affitto") usato per il fetch di verifica fattibilita' dello
-    Step 0, che e' stato bloccato da un CAPTCHA anti-bot prima di poter
-    confermare se la pagina di risultati raggiunta sia effettivamente
-    corretta. Come Subito.it e Immobiliare.it, si assume che Idealista
-    separi affitto e vendita come path distinti (bozza del brief, non
-    confermato dal sito reale).
+    Pattern URL fornito dall'utente e verificato reale (non piu' bozza):
+    https://www.idealista.it/vendita-case/jesi-ancona/
+    https://www.idealista.it/affitto-case/jesi-ancona/
+    — comune e provincia uniti da un trattino, non la sola regione come
+    nella bozza iniziale (che usava "-marche", mai verificata e sostituita).
     """
     if tipo not in ("affitto", "vendita"):
         raise ValueError(f"tipo non valido per idealista: {tipo}")
     path = "affitto-case" if tipo == "affitto" else "vendita-case"
-    slug = quote(centro_nome.lower())
-    return f"https://www.idealista.it/{path}/{slug}-marche/"
+    comune_slug = quote(centro_nome.lower())
+    provincia_slug = quote(provincia.lower())
+    return f"https://www.idealista.it/{path}/{comune_slug}-{provincia_slug}/"
 
 
-def parse_listings(html: str) -> list[Listing]:
+def parse_listings(html: str, tipo: str | None = None) -> list[Listing]:
+    """Estrae gli annunci da una pagina di ricerca Idealista.it salvata.
+
+    Se `tipo` e' passato esplicitamente (percorso di importazione manuale,
+    dove sappiamo gia' da quale ricerca proviene la pagina salvata) viene
+    usato direttamente, piu' affidabile del riconoscimento automatico dal
+    contenuto della pagina (mai verificato contro markup reale).
+    """
     soup = BeautifulSoup(html, "html.parser")
-    tipo = _detect_tipo(soup)
+    if tipo is None:
+        tipo = _detect_tipo(soup)
+    elif tipo not in ("affitto", "vendita"):
+        raise ValueError(f"tipo non valido per idealista: {tipo}")
     listings = []
     for card in soup.select(SELECTOR_CARD):
         title_el = card.select_one(SELECTOR_TITLE)

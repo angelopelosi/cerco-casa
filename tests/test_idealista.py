@@ -19,15 +19,21 @@ from scraper.idealista import parse_listings, build_search_url
 FIXTURE = Path(__file__).parent.parent / "fixtures" / "idealista_synthetic.html"
 
 
-def test_build_search_url_includes_centro_nome():
-    url = build_search_url("Jesi")
+def test_build_search_url_includes_centro_nome_e_provincia():
+    url = build_search_url("Jesi", "Ancona")
     assert "idealista.it" in url
     assert "jesi" in url.lower()
+    assert "ancona" in url.lower()
+
+
+def test_build_search_url_matches_real_pattern_fornito_dall_utente():
+    assert build_search_url("Jesi", "Ancona", tipo="vendita") == "https://www.idealista.it/vendita-case/jesi-ancona/"
+    assert build_search_url("Jesi", "Ancona", tipo="affitto") == "https://www.idealista.it/affitto-case/jesi-ancona/"
 
 
 def test_build_search_url_accepts_tipo_and_changes_path():
-    affitto_url = build_search_url("Jesi", tipo="affitto")
-    vendita_url = build_search_url("Jesi", tipo="vendita")
+    affitto_url = build_search_url("Jesi", "Ancona", tipo="affitto")
+    vendita_url = build_search_url("Jesi", "Ancona", tipo="vendita")
     assert "affitto" in affitto_url
     assert "vendita" in vendita_url
     assert affitto_url != vendita_url
@@ -35,7 +41,7 @@ def test_build_search_url_accepts_tipo_and_changes_path():
 
 def test_build_search_url_rejects_invalid_tipo():
     try:
-        build_search_url("Jesi", tipo="asta")
+        build_search_url("Jesi", "Ancona", tipo="asta")
     except ValueError:
         pass
     else:
@@ -62,6 +68,26 @@ def test_parse_listings_extracts_expected_fields(monkeypatch):
 def test_parse_listings_returns_empty_list_for_no_matches(monkeypatch):
     monkeypatch.setattr(idealista_module, "geocode_fn", lambda comune: (43.5, 13.2))
     assert parse_listings("<html><body>nessun annuncio</body></html>") == []
+
+
+def test_parse_listings_uses_explicit_tipo_when_given(monkeypatch):
+    # Percorso di importazione manuale: sappiamo gia' da quale ricerca
+    # proviene il file salvato, non serve indovinarlo dal contenuto pagina.
+    monkeypatch.setattr(idealista_module, "geocode_fn", lambda comune: (43.5, 13.2))
+    html = FIXTURE.read_text(encoding="utf-8")
+    listings = parse_listings(html, tipo="vendita")
+    assert all(l.tipo == "vendita" for l in listings)
+
+
+def test_parse_listings_rejects_invalid_explicit_tipo(monkeypatch):
+    monkeypatch.setattr(idealista_module, "geocode_fn", lambda comune: (43.5, 13.2))
+    html = FIXTURE.read_text(encoding="utf-8")
+    try:
+        parse_listings(html, tipo="asta")
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("tipo non valido avrebbe dovuto sollevare ValueError")
 
 
 def test_selector_card_matches_exactly_the_three_cards():
