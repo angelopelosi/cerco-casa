@@ -35,3 +35,15 @@ def test_validate_rejects_missing_fonte():
 def test_validate_rejects_negative_price():
     with pytest.raises(ValueError):
         make_listing(prezzo=-10).validate()
+
+def test_chi_vende_defaults_to_none():
+    l = make_listing()
+    assert l.chi_vende is None
+
+def test_validate_accepts_privato_and_agenzia():
+    make_listing(chi_vende="privato").validate()
+    make_listing(chi_vende="agenzia").validate()
+
+def test_validate_rejects_invalid_chi_vende():
+    with pytest.raises(ValueError):
+        make_listing(chi_vende="boh").validate()

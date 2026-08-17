@@ -26,15 +26,22 @@ CREATE TABLE IF NOT EXISTS listings (
     stato_annuncio TEXT NOT NULL DEFAULT 'attivo',
     tribunale TEXT,
     data_asta TEXT,
-    offerta_minima INTEGER
+    offerta_minima INTEGER,
+    chi_vende TEXT
 );
 """
 
 def connect(db_path: str) -> sqlite3.Connection:
     conn = sqlite3.connect(db_path)
     conn.execute(SCHEMA)
+    _migrate(conn)
     conn.commit()
     return conn
+
+def _migrate(conn: sqlite3.Connection) -> None:
+    existing_cols = {row[1] for row in conn.execute("PRAGMA table_info(listings)")}
+    if "chi_vende" not in existing_cols:
+        conn.execute("ALTER TABLE listings ADD COLUMN chi_vende TEXT")
 
 def upsert_listing(conn: sqlite3.Connection, listing: Listing, today: str | None = None) -> None:
     listing.validate()
@@ -48,21 +55,21 @@ def upsert_listing(conn: sqlite3.Connection, listing: Listing, today: str | None
         INSERT INTO listings (id, fonte, external_id, tipo, categoria, titolo, prezzo,
             superficie_mq, locali, comune, lat, lon, stato_disponibilita, data_disponibilita,
             arredato, url, data_pubblicazione, data_first_seen, data_last_seen, stato_annuncio,
-            tribunale, data_asta, offerta_minima)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            tribunale, data_asta, offerta_minima, chi_vende)
+        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
         ON CONFLICT(id) DO UPDATE SET
             prezzo=excluded.prezzo, superficie_mq=excluded.superficie_mq, locali=excluded.locali,
             comune=excluded.comune, lat=excluded.lat, lon=excluded.lon,
             stato_disponibilita=excluded.stato_disponibilita,
             data_disponibilita=excluded.data_disponibilita,
             arredato=excluded.arredato, data_last_seen=excluded.data_last_seen,
-            stato_annuncio='attivo'
+            stato_annuncio='attivo', chi_vende=excluded.chi_vende
         """,
         (listing.id, listing.fonte, listing.external_id, listing.tipo, listing.categoria,
          listing.titolo, listing.prezzo, listing.superficie_mq, listing.locali, listing.comune,
          listing.lat, listing.lon, listing.stato_disponibilita, listing.data_disponibilita,
          listing.arredato, listing.url, listing.data_pubblicazione, first_seen, today, "attivo",
-         listing.tribunale, listing.data_asta, listing.offerta_minima),
+         listing.tribunale, listing.data_asta, listing.offerta_minima, listing.chi_vende),
     )
     conn.commit()
 

@@ -1,3 +1,4 @@
+import sqlite3
 from scraper import db
 from scraper.schema import Listing
 
@@ -58,3 +59,43 @@ def test_get_new_since_filters_by_first_seen_date(tmp_path):
     recent = db.get_new_since(conn, "2026-08-10")
     assert len(recent) == 1
     assert recent[0]["external_id"] == "new"
+
+def test_connect_migrates_existing_db_missing_chi_vende_column(tmp_path):
+    db_path = str(tmp_path / "old.db")
+    # Simula un DB creato da una versione precedente dello schema (senza chi_vende)
+    raw = sqlite3.connect(db_path)
+    raw.execute("""
+        CREATE TABLE listings (
+            id TEXT PRIMARY KEY, fonte TEXT NOT NULL, external_id TEXT NOT NULL,
+            tipo TEXT NOT NULL, categoria TEXT NOT NULL DEFAULT 'residenziale',
+            titolo TEXT, prezzo INTEGER, superficie_mq INTEGER, locali INTEGER,
+            comune TEXT, lat REAL, lon REAL, stato_disponibilita TEXT,
+            data_disponibilita TEXT, arredato TEXT, url TEXT, data_pubblicazione TEXT,
+            data_first_seen TEXT NOT NULL, data_last_seen TEXT NOT NULL,
+            stato_annuncio TEXT NOT NULL DEFAULT 'attivo', tribunale TEXT,
+            data_asta TEXT, offerta_minima INTEGER
+        )
+    """)
+    raw.execute(
+        "INSERT INTO listings (id, fonte, external_id, tipo, titolo, prezzo, url, "
+        "data_first_seen, data_last_seen) VALUES ('x','subito','1','affitto','T',500,"
+        "'https://example.com/1','2026-08-01','2026-08-01')"
+    )
+    raw.commit()
+    raw.close()
+
+    conn = db.connect(db_path)
+    cols = {row[1] for row in conn.execute("PRAGMA table_info(listings)")}
+    assert "chi_vende" in cols
+    # la riga preesistente non deve andare persa dalla migrazione
+    rows = db.get_active(conn)
+    assert len(rows) == 1
+    assert rows[0]["chi_vende"] is None
+
+def test_upsert_listing_stores_chi_vende(tmp_path):
+    conn = db.connect(str(tmp_path / "test.db"))
+    listing = make_listing()
+    listing.chi_vende = "agenzia"
+    db.upsert_listing(conn, listing, today="2026-08-10")
+    rows = db.get_active(conn)
+    assert rows[0]["chi_vende"] == "agenzia"

@@ -25,6 +25,7 @@ class Listing:
     tribunale: Optional[str] = None
     data_asta: Optional[str] = None
     offerta_minima: Optional[int] = None
+    chi_vende: Optional[str] = None
 
     @property
     def id(self) -> str:
@@ -40,3 +41,5 @@ class Listing:
             raise ValueError("url obbligatorio")
         if self.prezzo is not None and self.prezzo < 0:
             raise ValueError("prezzo non puo essere negativo")
+        if self.chi_vende is not None and self.chi_vende not in ("privato", "agenzia"):
+            raise ValueError(f"chi_vende non valido: {self.chi_vende}")
