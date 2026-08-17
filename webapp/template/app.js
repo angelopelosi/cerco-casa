@@ -32,6 +32,7 @@ function applyFilters(listings) {
   const fonte = document.getElementById("f-fonte").value;
   const disponibilita = document.getElementById("f-disponibilita").value;
   const arredato = document.getElementById("f-arredato").value;
+  const chiVende = document.getElementById("f-chi-vende").value;
 
   return listings.filter((l) => {
     if (tipo && l.tipo !== tipo) return false;
@@ -43,6 +44,7 @@ function applyFilters(listings) {
     if (fonte && l.fonte !== fonte) return false;
     if (disponibilita && l.stato_disponibilita !== disponibilita) return false;
     if (arredato && l.arredato !== arredato) return false;
+    if (chiVende && l.chi_vende !== chiVende) return false;
     return true;
   });
 }
@@ -88,7 +90,8 @@ function render(allListings) {
     const p2 = document.createElement("p");
     const mqText = l.superficie_mq ? l.superficie_mq + " mq" : "";
     const arredatoText = l.arredato && l.arredato !== "non_specificato" ? "· arredato: " + l.arredato : "";
-    const detailParts = [mqText, arredatoText].filter(s => s);
+    const chiVendeText = l.chi_vende ? "· " + l.chi_vende : "";
+    const detailParts = [mqText, arredatoText, chiVendeText].filter(s => s);
     p2.textContent = detailParts.join(" ");
     card.appendChild(p2);
 
