@@ -1,3 +1,4 @@
+import requests
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from .schema import Listing
@@ -8,7 +9,8 @@ from .geocode import geocode as geocode_fn, GeocodeError
 # https://www.idealista.it/affitto-case/jesi-marche/ ha restituito una pagina
 # di blocco DataDome CAPTCHA (non risultati reali) — pagina di 1499 byte,
 # <title>idealista.it</title>, iframe title="DataDome CAPTCHA" verso
-# geo.captcha-delivery.com — vedi task-9-report.md per l'evidenza completa
+# geo.captcha-delivery.com — vedi
+# docs/superpowers/reports/task-9-idealista-antibot-report.md per l'evidenza completa
 # (stesso schema di blocco riscontrato da Task 8 su immobiliare.it). Di
 # conseguenza NON e' stato possibile catturare una fixture reale ne'
 # verificare i selettori sotto contro il markup reale del sito. I test di
@@ -76,7 +78,7 @@ def parse_listings(html: str) -> list[Listing]:
         if comune:
             try:
                 lat, lon = geocode_fn(comune)
-            except GeocodeError:
+            except (GeocodeError, requests.RequestException):
                 pass
 
         listings.append(Listing(

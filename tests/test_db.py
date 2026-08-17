@@ -99,3 +99,40 @@ def test_upsert_listing_stores_chi_vende(tmp_path):
     db.upsert_listing(conn, listing, today="2026-08-10")
     rows = db.get_active(conn)
     assert rows[0]["chi_vende"] == "agenzia"
+
+def test_upsert_listing_does_not_null_out_chi_vende_on_reupsert(tmp_path):
+    # Review finale del branch: un re-scrape la cui estrazione chi_vende
+    # fallisce transitoriamente (es. __NEXT_DATA__ di subito.py non parsabile)
+    # non deve azzerare un valore privato/agenzia gia' noto per lo stesso
+    # annuncio. chi_vende non cambia mai legittimamente per un annuncio reale,
+    # quindi l'ultimo valore non-null noto va preservato (ON CONFLICT usa
+    # COALESCE(excluded.chi_vende, chi_vende), non un overwrite incondizionato).
+    conn = db.connect(str(tmp_path / "test.db"))
+    listing = make_listing()
+    listing.chi_vende = "privato"
+    db.upsert_listing(conn, listing, today="2026-08-10")
+    rows = db.get_active(conn)
+    assert rows[0]["chi_vende"] == "privato"
+
+    reupserted = make_listing()
+    reupserted.chi_vende = None  # estrazione fallita in questo re-scrape
+    db.upsert_listing(conn, reupserted, today="2026-08-12")
+    rows = db.get_active(conn)
+    assert rows[0]["chi_vende"] == "privato"
+
+def test_upsert_listing_updates_chi_vende_when_newly_determined(tmp_path):
+    # Contro-caso della COALESCE: se il nuovo scrape determina un valore, deve
+    # comunque sovrascrivere il precedente (COALESCE si applica solo quando il
+    # nuovo valore e' None).
+    conn = db.connect(str(tmp_path / "test.db"))
+    listing = make_listing()
+    listing.chi_vende = None
+    db.upsert_listing(conn, listing, today="2026-08-10")
+    rows = db.get_active(conn)
+    assert rows[0]["chi_vende"] is None
+
+    reupserted = make_listing()
+    reupserted.chi_vende = "agenzia"
+    db.upsert_listing(conn, reupserted, today="2026-08-12")
+    rows = db.get_active(conn)
+    assert rows[0]["chi_vende"] == "agenzia"

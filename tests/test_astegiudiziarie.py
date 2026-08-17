@@ -48,7 +48,21 @@ def test_parse_listings_parses_italian_formatted_price(monkeypatch):
     html = FIXTURE.read_text(encoding="utf-8")
     listings = parse_listings(html)
     assert listings[0].prezzo == 231975
-    assert listings[0].offerta_minima == 231975
+
+
+def test_parse_listings_offerta_minima_is_none_not_prezzo(monkeypatch):
+    # Review finale del branch: il sito non espone un campo "offerta minima"
+    # distinto nella vista elenco (verificato su fixtures/astegiudiziarie_sample.html,
+    # solo "Ultimo prezzo base" per card). Copiare prezzo come placeholder
+    # produceva un dato dimostrabilmente sbagliato (confrontato con lo stesso
+    # lotto fisico su asteimmobili.py/portaleaste.py, che leggono un valore
+    # reale distinto). None e' il valore onesto quando il dato non e'
+    # disponibile nella fonte, non un duplicato silenzioso di prezzo.
+    monkeypatch.setattr(ag_module, "geocode_fn", lambda comune: (43.5, 13.2))
+    html = FIXTURE.read_text(encoding="utf-8")
+    listings = parse_listings(html)
+    assert listings[0].offerta_minima is None
+    assert all(l.offerta_minima is None for l in listings)
 
 
 def test_parse_listings_extracts_data_asta(monkeypatch):

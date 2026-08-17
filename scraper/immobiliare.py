@@ -1,3 +1,4 @@
+import requests
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from .schema import Listing
@@ -6,7 +7,8 @@ from .geocode import geocode as geocode_fn, GeocodeError
 # ATTENZIONE — Task 8, Step 0 (verifica fattibilita' anti-bot): il fetch di
 # verifica (Playwright headless, fetch normale, nessuna evasione tentata) su
 # https://www.immobiliare.it/affitto-case/jesi/ ha restituito una pagina di
-# blocco DataDome CAPTCHA (non risultati reali) — vedi task-8-report.md per
+# blocco DataDome CAPTCHA (non risultati reali) — vedi
+# docs/superpowers/reports/task-8-immobiliare-antibot-report.md per
 # l'evidenza completa. Di conseguenza NON e' stato possibile catturare una
 # fixture reale ne' verificare i selettori sotto contro il markup reale del
 # sito. I test di questo modulo girano contro
@@ -81,7 +83,7 @@ def parse_listings(html: str) -> list[Listing]:
         if comune:
             try:
                 lat, lon = geocode_fn(comune)
-            except GeocodeError:
+            except (GeocodeError, requests.RequestException):
                 pass
 
         listings.append(Listing(

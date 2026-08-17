@@ -1,4 +1,5 @@
 import re
+import requests
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from .schema import Listing
@@ -116,7 +117,7 @@ def parse_listings(html: str) -> list[Listing]:
         if comune:
             try:
                 lat, lon = geocode_fn(comune)
-            except GeocodeError:
+            except (GeocodeError, requests.RequestException):
                 pass
 
         tribunale = _extract_tribunale(card)

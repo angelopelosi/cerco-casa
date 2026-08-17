@@ -63,7 +63,7 @@ def upsert_listing(conn: sqlite3.Connection, listing: Listing, today: str | None
             stato_disponibilita=excluded.stato_disponibilita,
             data_disponibilita=excluded.data_disponibilita,
             arredato=excluded.arredato, data_last_seen=excluded.data_last_seen,
-            stato_annuncio='attivo', chi_vende=excluded.chi_vende
+            stato_annuncio='attivo', chi_vende=COALESCE(excluded.chi_vende, chi_vende)
         """,
         (listing.id, listing.fonte, listing.external_id, listing.tipo, listing.categoria,
          listing.titolo, listing.prezzo, listing.superficie_mq, listing.locali, listing.comune,

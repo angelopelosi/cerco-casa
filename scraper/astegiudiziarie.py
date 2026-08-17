@@ -1,4 +1,5 @@
 import re
+import requests
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from .schema import Listing
@@ -101,7 +102,7 @@ def parse_listings(html: str) -> list[Listing]:
         if comune:
             try:
                 lat, lon = geocode_fn(comune)
-            except GeocodeError:
+            except (GeocodeError, requests.RequestException):
                 pass
 
         tribunale, data_asta = _extract_tribunale_e_data(card)
@@ -125,7 +126,20 @@ def parse_listings(html: str) -> list[Listing]:
             lon=lon,
             tribunale=tribunale,
             data_asta=data_asta,
-            offerta_minima=prezzo,
+            # offerta_minima=None: a differenza di asteimmobili.py/portaleaste.py
+            # (dove la card mostra "Offerta minima" come valore distinto da
+            # "Prezzo base"), questo sito NON espone alcun campo "offerta
+            # minima"/"rialzo"/"cauzione" nella vista elenco (verificato: grep
+            # case-insensitive su fixtures/astegiudiziarie_sample.html, solo
+            # "Ultimo prezzo base" per card, nessun'altra etichetta di importo).
+            # Copiare qui prezzo (fatto in precedenza) produceva un dato
+            # silenziosamente sbagliato per lo stesso lotto fisico rispetto alle
+            # altre due fonti aste (verificato via Mazzangrugno 18: asteimmobili/
+            # portaleaste leggono offerta_minima=173982 dalla pagina, questo
+            # scraper con prezzo=231975 come placeholder avrebbe salvato 231975)
+            # — None e' il valore onesto quando il dato non e' disponibile nella
+            # fonte, stesso stile di tribunale=None in pvp_giustizia.py.
+            offerta_minima=None,
             chi_vende=None,  # asta giudiziaria: venditore e' la procedura esecutiva, non privato/agenzia
         ))
     return listings
