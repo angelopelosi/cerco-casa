@@ -1,0 +1,60 @@
+<!--
+FIXTURE SINTETICA — NON e' una cattura reale di idealista.it.
+
+Task 9 (scraper Idealista.it), Step 0: il fetch di verifica fattibilita'
+(Playwright headless, fetch normale, nessuna evasione anti-bot tentata) su
+https://www.idealista.it/affitto-case/jesi-marche/ ha restituito una pagina
+di blocco DataDome CAPTCHA (title "idealista.it", 1499 byte, iframe verso
+geo.captcha-delivery.com con title="DataDome CAPTCHA"), non una pagina di
+risultati reale — stesso schema di blocco riscontrato da Task 8 su
+immobiliare.it. Per questo non e' stato possibile catturare una fixture
+reale come per fixtures/subito_sample.html o fixtures/asteimmobili_sample.html.
+
+Questa pagina e' stata scritta a mano da questo task, strutturalmente
+coerente con la convenzione di classi assunta dalla bozza del brief (card
+"article.item", titolo/link "a.item-link", prezzo ".item-price", comune
+".item-detail-char"/".item-location"), usata solo per verificare che il
+codice di parsing funzioni contro una struttura plausibile. Non e' prova che
+questa struttura corrisponda al markup reale del sito: nomi di classe,
+nesting e formattazione dei campi sono NON VERIFICATI.
+
+NOTA (lezione applicata proattivamente da Task 8 — vedi task-8-report.md,
+addendum "review fix"): li' un selettore a sottostringa sull'attributo class
+(`[class*='in-card']`) matchava per errore anche classi figlie BEM come
+"in-card__title". Qui i selettori sono gia' scritti come classi CSS esatte
+(".item-price", non "[class*='item-price']"), quindi la prima card include
+deliberatamente un elemento figlio con classe "item-price-old" (prezzo
+precedente, prima di uno sconto) accanto a ".item-price": essendo
+"item-price-old" un singolo token di classe diverso da "item-price", un vero
+selettore CSS per classe (non per sottostringa) non lo matcha. Verificato
+dal test di regressione in tests/test_idealista.py.
+-->
+<html>
+<head><title>Jesi - Case in affitto in provincia di Ancona | idealista.it</title></head>
+<body>
+<h1>Jesi - Case in affitto</h1>
+<div class="items-container">
+
+  <article class="item">
+    <a class="item-link" href="/immobile/12345678/">Trilocale via Roma, centro storico, Jesi</a>
+    <div class="item-price-container">
+      <span class="item-price-old">&euro; 750</span>
+      <span class="item-price">&euro; 650</span>
+    </div>
+    <span class="item-detail-char">Jesi</span>
+  </article>
+
+  <article class="item">
+    <a class="item-link" href="/immobile/98765432/">Bilocale zona Stadio, Jesi</a>
+    <span class="item-price">&euro; 1.200</span>
+    <span class="item-location">Jesi</span>
+  </article>
+
+  <article class="item">
+    <a class="item-link" href="/immobile/55555555/">Attico senza prezzo indicato, Jesi</a>
+    <span class="item-detail-char">Jesi</span>
+  </article>
+
+</div>
+</body>
+</html>
