@@ -21,10 +21,27 @@ WAIT_SELECTOR = "body"
 # NON VERIFICATO: cattura bloccata da anti-bot (Step 0, vedi nota sopra).
 # Selettori di partenza presi dalla bozza del brief, non confermati contro
 # HTML reale — potrebbero non corrispondere al markup effettivo del sito.
-SELECTOR_CARD = "[class*='in-card'], [class*='listing-item']"
-SELECTOR_TITLE = "[class*='in-card__title']"
-SELECTOR_PRICE = "[class*='in-price']"
-SELECTOR_COMUNE = "[class*='in-card__location']"
+#
+# NOTA (review fix): la bozza originale usava match per sottostringa
+# sull'attributo class (`[class*='in-card']`), che matcha per errore anche
+# classi figlie BEM come "in-card__title"/"in-card__location" (contengono
+# "in-card" come sottostringa) e qualunque wrapper il cui nome contenga
+# "listing-item" come sottostringa (es. "listing-items"). Verificato contro
+# fixtures/immobiliare_synthetic.html: la vecchia regex produceva 9 match di
+# soup.select(SELECTOR_CARD) invece dei 3 attesi (i 6 in piu' erano le
+# classi figlie in-card__title/in-card__location di ciascuna delle 3 card).
+# Non causava un bug visibile solo per una fortuita coincidenza strutturale
+# della fixture (quei nodi extra sono foglie senza title/link annidati, quindi
+# il guard `if not (title_el and link_el...)` li scartava) — non e' una
+# garanzia della selettore stessa. Corretto passando a selettori CSS per
+# classe esatta (match sul singolo token di classe, non sottostringa), che
+# elimina la collisione a prescindere dal markup reale del sito (fix valido
+# per qualunque sito che segua la stessa convenzione BEM assunta dalla bozza
+# del brief, non un'assunzione aggiuntiva sul markup).
+SELECTOR_CARD = ".in-card, .listing-item"
+SELECTOR_TITLE = ".in-card__title"
+SELECTOR_PRICE = ".in-price"
+SELECTOR_COMUNE = ".in-card__location"
 SELECTOR_LINK = "a"
 
 

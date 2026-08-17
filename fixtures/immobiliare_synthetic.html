@@ -10,21 +10,26 @@ risultati reale. Per questo non e' stato possibile catturare una fixture
 reale come per fixtures/subito_sample.html o fixtures/asteimmobili_sample.html.
 
 Questa pagina e' stata scritta a mano da questo task, strutturalmente
-coerente con i selettori di bozza forniti dal brief
-(SELECTOR_CARD = "[class*='in-card'], [class*='listing-item']",
-SELECTOR_TITLE = "[class*='in-card__title']", SELECTOR_PRICE = "[class*='in-price']",
-SELECTOR_COMUNE = "[class*='in-card__location']", SELECTOR_LINK = "a"),
-usata solo per verificare che il codice di parsing funzioni contro una
-struttura plausibile. Non e' prova che questa struttura corrisponda al
-markup reale del sito: nomi di classe, nesting e formattazione dei campi
-sono NON VERIFICATI.
+coerente con la convenzione BEM di classi assunta dalla bozza del brief
+(card "in-card", titolo "in-card__title", prezzo "in-price", comune
+"in-card__location"), usata solo per verificare che il codice di parsing
+funzioni contro una struttura plausibile. Non e' prova che questa struttura
+corrisponda al markup reale del sito: nomi di classe, nesting e
+formattazione dei campi sono NON VERIFICATI.
 
-NOTA: il div che avvolge le card e' deliberatamente chiamato
-"risultati-ricerca" (non "listing-items") per evitare una collisione con
-SELECTOR_CARD (che fa match parziale su "listing-item" oltre che su
-"in-card"): un wrapper reale chiamato ad es. "listing-items-container" sul
-sito vero causerebbe lo stesso problema — non e' possibile escluderlo senza
-dati reali, vedi Concerns nel report.
+NOTA (review fix): i selettori originali della bozza usavano match per
+sottostringa sull'attributo class (`[class*='in-card']`), che matchava per
+errore anche le classi FIGLIE come "in-card__title"/"in-card__location"
+(contengono "in-card" come sottostringa) — verificato: produceva 9 match di
+soup.select(SELECTOR_CARD) su questa fixture invece dei 3 attesi. Non
+causava un bug visibile solo per una fortuita coincidenza (i 6 match extra
+sono foglie senza title/link annidati, scartate dal guard del parser) — non
+era una garanzia della selettore. Corretto in scraper/immobiliare.py
+passando a selettori per classe esatta (".in-card", ".in-card__title", ecc.,
+match sul singolo token di classe): elimina sia questa collisione
+figlio-genitore sia il rischio, gia' evitato qui rinominando il div wrapper
+in "risultati-ricerca" invece di "listing-items", che un wrapper reale con
+un nome-sottostringa simile causi lo stesso problema.
 -->
 <html>
 <head><title>Jesi - Affitto case in provincia di Ancona | Immobiliare.it</title></head>

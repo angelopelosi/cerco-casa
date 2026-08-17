@@ -11,6 +11,7 @@
 # scaricati dal sito. I selettori in scraper/immobiliare.py restano quindi
 # NON VERIFICATI contro il markup reale del sito.
 from pathlib import Path
+from bs4 import BeautifulSoup
 import scraper.immobiliare as imm_module
 from scraper.immobiliare import parse_listings, build_search_url
 
@@ -60,6 +61,20 @@ def test_parse_listings_extracts_expected_fields(monkeypatch):
 def test_parse_listings_returns_empty_list_for_no_matches(monkeypatch):
     monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
     assert parse_listings("<html><body>nessun annuncio</body></html>") == []
+
+
+def test_selector_card_matches_exactly_the_three_cards_not_child_classes():
+    # Regressione (review finding): la vecchia SELECTOR_CARD faceva match
+    # per sottostringa sull'attributo class (`[class*='in-card']`), che
+    # matchava anche le classi figlie BEM come "in-card__title" e
+    # "in-card__location" (contengono "in-card" come sottostringa),
+    # producendo 9 match invece dei 3 attesi su questa fixture. I selettori
+    # per classe esatta (".in-card, .listing-item") non devono avere questo
+    # problema: verifica diretta del conteggio dei match.
+    html = FIXTURE.read_text(encoding="utf-8")
+    soup = BeautifulSoup(html, "html.parser")
+    matches = soup.select(imm_module.SELECTOR_CARD)
+    assert len(matches) == 3
 
 
 def test_parse_listings_extracts_correct_external_id_from_trailing_slash_url(monkeypatch):
