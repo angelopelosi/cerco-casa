@@ -122,6 +122,7 @@ def parse_listings(html: str) -> list[Listing]:
             lat=lat,
             lon=lon,
             tribunale=None,  # non disponibile nella vista elenco (vedi nota sopra)
+            chi_vende=None,  # aste giudiziarie: venditore e' la procedura esecutiva, non privato/agenzia
             data_asta=data_asta_el.get_text(strip=True) if data_asta_el else None,
             data_pubblicazione=data_pubblicazione_el.get_text(strip=True) if data_pubblicazione_el else None,
             offerta_minima=prezzo,

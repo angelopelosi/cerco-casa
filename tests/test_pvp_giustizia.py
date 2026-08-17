@@ -76,6 +76,16 @@ def test_parse_listings_tribunale_is_none_when_not_shown_in_list_view(monkeypatc
     assert all(l.tribunale is None for l in listings)
 
 
+def test_parse_listings_chi_vende_is_always_none(monkeypatch):
+    # Le aste giudiziarie non hanno un venditore privato/agenzia: il
+    # "venditore" e' la procedura esecutiva, non una delle due categorie.
+    monkeypatch.setattr(pvp_module, "geocode_fn", lambda comune: (43.5, 13.2))
+    html = FIXTURE.read_text(encoding="utf-8")
+    listings = parse_listings(html)
+    assert len(listings) > 0
+    assert all(l.chi_vende is None for l in listings)
+
+
 def test_parse_listings_geocodes_comune_when_present(monkeypatch):
     calls = []
 
