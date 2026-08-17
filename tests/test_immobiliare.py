@@ -1,21 +1,16 @@
-# NOTA IMPORTANTE: Task 8 (Immobiliare.it) e' passato per il percorso di
-# fallback previsto dal brief. Lo Step 0 (verifica fattibilita' anti-bot,
-# fetch Playwright headless normale su
-# https://www.immobiliare.it/affitto-case/jesi/, nessuna evasione tentata) ha
-# restituito una pagina di blocco DataDome CAPTCHA, non risultati reali (vedi
-# task-8-report.md per l'HTML del blocco). Di conseguenza NON e' stato
-# possibile catturare una fixture reale come per subito/astegiudiziarie/
-# asteimmobili: `fixtures/immobiliare_synthetic.html` e' una pagina
-# costruita a mano da questo task, strutturalmente coerente con i selettori
-# di bozza del brief (SELECTOR_CARD/TITLE/PRICE/COMUNE/LINK), NON dati reali
-# scaricati dal sito. I selettori in scraper/immobiliare.py restano quindi
-# NON VERIFICATI contro il markup reale del sito.
+# NOTA IMPORTANTE: Immobiliare.it e' bloccato da anti-bot DataDome per fetch
+# automatici (headless e headed, entrambi verificati bloccati — vedi
+# docs/superpowers/reports/task-8-immobiliare-antibot-report.md). I selettori
+# in scraper/immobiliare.py sono pero' VERIFICATI: le fixture qui sotto sono
+# pagine reali salvate manualmente dall'utente nel proprio browser
+# (percorso: scripts/apri_ricerche_manuali.py + scripts/importa_ricerche_manuali.py,
+# vedi scraper/immobiliare.py per i dettagli), non piu' dati sintetici.
 from pathlib import Path
-from bs4 import BeautifulSoup
 import scraper.immobiliare as imm_module
 from scraper.immobiliare import parse_listings, build_search_url
 
-FIXTURE = Path(__file__).parent.parent / "fixtures" / "immobiliare_synthetic.html"
+FIXTURE = Path(__file__).parent.parent / "fixtures" / "immobiliare_sample.html"  # ricerca "vendita" reale, Jesi
+FIXTURE_ASTA = Path(__file__).parent.parent / "fixtures" / "immobiliare_asta_sample.html"  # ricerca "aste-immobiliari" reale, Jesi
 
 
 def test_build_search_url_includes_centro_nome():
@@ -50,32 +45,21 @@ def test_build_search_url_rejects_invalid_tipo():
 def test_parse_listings_extracts_expected_fields(monkeypatch):
     monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
     html = FIXTURE.read_text(encoding="utf-8")
-    listings = parse_listings(html)
-    assert len(listings) > 0
+    listings = parse_listings(html, tipo="vendita")
+    assert len(listings) == 25  # verificato: 25 card reali sulla pagina salvata
     first = listings[0]
     assert first.fonte == "immobiliare"
-    assert first.tipo in ("affitto", "vendita")
-    # la fixture sintetica simula una ricerca "affitto" (h1/title senza "vendita")
-    assert first.tipo == "affitto"
     assert first.categoria == "residenziale"
-    assert first.external_id
-    assert first.titolo
-    assert isinstance(first.prezzo, int) and first.prezzo >= 0
-    assert first.url.startswith("http")
+    assert first.external_id == "131775402"  # attributo id del <li>, verificato
+    assert first.titolo.startswith("Quadrilocale via Erbarella")
+    assert first.prezzo == 250000
+    assert first.url == "https://www.immobiliare.it/annunci/131775402/"
+    assert first.comune == "Jesi"
 
 
 def test_parse_listings_returns_empty_list_for_no_matches(monkeypatch):
     monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
-    assert parse_listings("<html><body>nessun annuncio</body></html>") == []
-
-
-def test_parse_listings_uses_explicit_tipo_when_given(monkeypatch):
-    # Percorso di importazione manuale: sappiamo gia' da quale ricerca
-    # proviene il file salvato, non serve indovinarlo dal contenuto pagina.
-    monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
-    html = FIXTURE.read_text(encoding="utf-8")
-    listings = parse_listings(html, tipo="vendita")
-    assert all(l.tipo == "vendita" for l in listings)
+    assert parse_listings("<html><body>nessun annuncio</body></html>", tipo="vendita") == []
 
 
 def test_parse_listings_rejects_invalid_explicit_tipo(monkeypatch):
@@ -89,75 +73,52 @@ def test_parse_listings_rejects_invalid_explicit_tipo(monkeypatch):
         raise AssertionError("tipo non valido avrebbe dovuto sollevare ValueError")
 
 
-def test_parse_listings_asta_tipo_does_not_crash_without_auction_selectors(monkeypatch):
-    # La fixture sintetica simula annunci normali, non aste (nessuna pagina
-    # aste-immobiliari reale e' mai stata vista) — verifica solo che il
-    # percorso tipo="asta" non esploda quando i selettori NON VERIFICATI
-    # SELECTOR_TRIBUNALE/SELECTOR_DATA_ASTA non trovano nulla: deve degradare
-    # a None, non sollevare un'eccezione.
+def test_parse_listings_reclassifies_auction_cards_within_vendita_search(monkeypatch):
+    # Scoperta reale (non nel piano originale): la ricerca "vendita" mischia
+    # annunci d'asta veri e propri (titolo "Villa all'asta via X, Jesi") tra
+    # i risultati normali — 7 casi su 25 nella fixture reale. Il tipo della
+    # singola card si corregge dal proprio titolo, non dal tipo della pagina.
     monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
     html = FIXTURE.read_text(encoding="utf-8")
-    listings = parse_listings(html, tipo="asta")
-    assert len(listings) > 0
-    assert all(l.tipo == "asta" for l in listings)
-    assert all(l.tribunale is None for l in listings)
-    assert all(l.data_asta is None for l in listings)
-    assert all(l.offerta_minima is None for l in listings)
+    listings = parse_listings(html, tipo="vendita")
+    aste = [l for l in listings if l.tipo == "asta"]
+    vendite = [l for l in listings if l.tipo == "vendita"]
+    assert len(aste) == 7
+    assert len(vendite) == 18
+    assert all("all'asta" in l.titolo.lower() for l in aste)
+    assert all(l.offerta_minima == l.prezzo for l in aste)  # unico valore disponibile in elenco
+    assert all(l.offerta_minima is None for l in vendite)
 
 
-def test_selector_card_matches_exactly_the_three_cards_not_child_classes():
-    # Regressione (review finding): la vecchia SELECTOR_CARD faceva match
-    # per sottostringa sull'attributo class (`[class*='in-card']`), che
-    # matchava anche le classi figlie BEM come "in-card__title" e
-    # "in-card__location" (contengono "in-card" come sottostringa),
-    # producendo 9 match invece dei 3 attesi su questa fixture. I selettori
-    # per classe esatta (".in-card, .listing-item") non devono avere questo
-    # problema: verifica diretta del conteggio dei match.
+def test_selector_card_matches_exactly_25_real_cards():
+    from bs4 import BeautifulSoup
     html = FIXTURE.read_text(encoding="utf-8")
     soup = BeautifulSoup(html, "html.parser")
     matches = soup.select(imm_module.SELECTOR_CARD)
-    assert len(matches) == 3
+    assert len(matches) == 25
 
 
-def test_parse_listings_extracts_correct_external_id_from_trailing_slash_url(monkeypatch):
-    # La bozza del brief calcolava l'external_id con un'euristica
-    # (url.endswith("/") -> penultimo segmento del path) che, per un URL del
-    # tipo ".../annunci/123456789/", restituisce erroneamente "annunci"
-    # (segmento statico) invece dell'ID numerico "123456789". Corretto
-    # prendendo sempre l'ultimo segmento non vuoto del path, a prescindere
-    # dallo slash finale. Verificato qui con la seconda card della fixture
-    # sintetica, il cui href termina con "/".
+def test_parse_listings_extracts_locali_superficie_arredato(monkeypatch):
+    # Verificato su annunci reali: "4 locali", "153 mq", "Parzialmente Arredato".
     monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
     html = FIXTURE.read_text(encoding="utf-8")
-    listings = parse_listings(html)
-    second = listings[1]
-    assert second.external_id == "987654321"
-    assert second.external_id != "annunci"
+    listings = parse_listings(html, tipo="vendita")
+    first = listings[0]
+    assert first.locali == 4
+    assert first.superficie_mq == 153
+    assert first.arredato == "parzialmente arredato"
 
 
-def test_parse_listings_parses_price_with_thousands_separator(monkeypatch):
+def test_parse_listings_chi_vende_from_agency_badge_presence(monkeypatch):
+    # Verificato su annunci reali: la prima card (senza logo agenzia) e'
+    # "privato", la seconda (logo "Alfalux S.R.L.S") e' "agenzia".
     monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
     html = FIXTURE.read_text(encoding="utf-8")
-    listings = parse_listings(html)
-    assert any(l.prezzo == 1200 for l in listings)
-
-
-def test_parse_listings_defaults_price_to_zero_when_missing(monkeypatch):
-    # Terza card della fixture sintetica: nessun elemento prezzo presente.
-    monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
-    html = FIXTURE.read_text(encoding="utf-8")
-    listings = parse_listings(html)
-    assert any(l.prezzo == 0 for l in listings)
-
-
-def test_parse_listings_does_not_assume_chi_vende(monkeypatch):
-    # Il brief chiede di verificare sul dato reale prima di assumere
-    # chi_vende sempre "agenzia": lo Step 0 non ha permesso alcuna verifica,
-    # quindi il parser non deve inventare un valore.
-    monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
-    html = FIXTURE.read_text(encoding="utf-8")
-    listings = parse_listings(html)
-    assert all(l.chi_vende is None for l in listings)
+    listings = parse_listings(html, tipo="vendita")
+    assert listings[0].chi_vende == "privato"
+    assert listings[1].chi_vende == "agenzia"
+    assert any(l.chi_vende == "agenzia" for l in listings)
+    assert any(l.chi_vende == "privato" for l in listings)
 
 
 def test_parse_listings_geocodes_comune_when_present(monkeypatch):
@@ -169,8 +130,25 @@ def test_parse_listings_geocodes_comune_when_present(monkeypatch):
 
     monkeypatch.setattr(imm_module, "geocode_fn", fake_geocode)
     html = FIXTURE.read_text(encoding="utf-8")
-    listings = parse_listings(html)
+    listings = parse_listings(html, tipo="vendita")
     assert len(listings) > 0
-    assert calls  # la fixture sintetica espone sempre un comune per card
+    assert calls
     assert listings[0].lat == 43.5
     assert listings[0].lon == 13.2
+
+
+def test_parse_listings_asta_page_extracts_expected_fields(monkeypatch):
+    # Pagina "aste-immobiliari" dedicata (non mischiata come sopra): 4
+    # aste reali trovate per Jesi.
+    monkeypatch.setattr(imm_module, "geocode_fn", lambda comune: (43.5, 13.2))
+    html = FIXTURE_ASTA.read_text(encoding="utf-8")
+    listings = parse_listings(html, tipo="asta")
+    assert len(listings) == 4
+    first = listings[0]
+    assert first.tipo == "asta"
+    assert first.external_id == "130802974"
+    assert first.prezzo == 28800  # testo reale: "da 28.800,00 �", il prefisso "da" va scartato
+    assert first.offerta_minima == 28800
+    assert first.tribunale is None  # non visibile in elenco, non inventato
+    assert first.data_asta is None  # idem
+    assert first.chi_vende == "agenzia"

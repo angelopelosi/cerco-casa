@@ -22,31 +22,31 @@ from scraper import immobiliare, idealista
 CAPTURE_DIR = Path("manual_captures")
 
 
-def build_targets(config: dict) -> list[tuple[str, str]]:
+def build_targets(config: dict) -> list[str]:
     centro = config["centro"]["nome"]
     provincia = config["centro"]["provincia"]
     return [
-        ("idealista_vendita.html", idealista.build_search_url(centro, provincia, tipo="vendita")),
-        ("idealista_affitto.html", idealista.build_search_url(centro, provincia, tipo="affitto")),
-        ("immobiliare_vendita.html", immobiliare.build_search_url(centro, tipo="vendita")),
-        ("immobiliare_affitto.html", immobiliare.build_search_url(centro, tipo="affitto")),
-        ("immobiliare_asta.html", immobiliare.build_search_url(centro, tipo="asta")),
+        idealista.build_search_url(centro, provincia, tipo="vendita"),
+        idealista.build_search_url(centro, provincia, tipo="affitto"),
+        immobiliare.build_search_url(centro, tipo="vendita"),
+        immobiliare.build_search_url(centro, tipo="affitto"),
+        immobiliare.build_search_url(centro, tipo="asta"),
     ]
 
 
 def main() -> None:
     config = yaml.safe_load(Path("config.yaml").read_text())
     CAPTURE_DIR.mkdir(exist_ok=True)
-    targets = build_targets(config)
+    urls = build_targets(config)
 
     print("Si aprono 5 schede nel browser predefinito.")
-    print('Per ciascuna: Ctrl+S, "Salva come tipo: Pagina web, solo HTML", nel percorso indicato.\n')
-    for filename, url in targets:
-        dest = CAPTURE_DIR / filename
-        print(f"  {url}\n    -> salva come: {dest}\n")
+    print(f'Per ciascuna: Ctrl+S, salva dentro "{CAPTURE_DIR}/" (il nome che propone il browser va benissimo,')
+    print("  non serve rinominare — lo script di import lo riconosce dal nome della pagina).\n")
+    for url in urls:
+        print(f"  {url}")
         webbrowser.open(url)
 
-    print(f"Fatto. Dopo aver salvato tutte le pagine in {CAPTURE_DIR}/, lancia:")
+    print(f"\nFatto. Dopo aver salvato le pagine in {CAPTURE_DIR}/, lancia:")
     print("  python -m scripts.importa_ricerche_manuali")
 
 
