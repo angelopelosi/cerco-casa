@@ -56,3 +56,12 @@ def test_build_digest_html_escapes_html_special_characters(tmp_path):
     assert "Jesi &amp; Roma" in html, "Ampersands should be escaped"
     assert "subito&quot;malicious" in html, "Quotes should be escaped"
     assert "param=&quot;inject&quot;" in html, "URL quotes should be escaped"
+
+def test_build_digest_html_handles_missing_comune(tmp_path):
+    template_path = tmp_path / "template.html"
+    template_path.write_text(TEMPLATE)
+    listings = [
+        {"titolo": "Lotto n. 1", "comune": None, "prezzo": 1000, "fonte": "pvp_giustizia", "url": "https://example.com/1"}
+    ]
+    html = digest.build_digest_html(listings, template_path=str(template_path))
+    assert "Lotto n. 1" in html
