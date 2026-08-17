@@ -77,3 +77,13 @@ def test_parse_listings_geocodes_comune_when_present(monkeypatch):
 def test_parse_listings_returns_empty_list_for_no_matches(monkeypatch):
     monkeypatch.setattr(subito_module, "geocode_fn", lambda comune: (43.5, 13.2))
     assert parse_listings("<html><body>nessun annuncio</body></html>") == []
+
+
+def test_parse_listings_sets_chi_vende_from_next_data(monkeypatch):
+    monkeypatch.setattr(subito_module, "geocode_fn", lambda comune: (43.5, 13.2))
+    html = FIXTURE.read_text(encoding="utf-8")
+    listings = parse_listings(html)
+    # il primo annuncio della fixture ("Appartamento riviera adriatica",
+    # advertiser "alfio amici") ha company:false nel JSON __NEXT_DATA__ reale
+    assert listings[0].chi_vende == "privato"
+    assert any(l.chi_vende == "agenzia" for l in listings)

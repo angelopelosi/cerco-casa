@@ -1,3 +1,5 @@
+import json
+import re
 from urllib.parse import quote
 from bs4 import BeautifulSoup
 from .schema import Listing
@@ -47,6 +49,7 @@ def build_search_url(centro_nome: str, tipo: str = "affitto") -> str:
 def parse_listings(html: str) -> list[Listing]:
     soup = BeautifulSoup(html, "html.parser")
     tipo = _detect_tipo(soup)
+    chi_vende_lookup = _build_chi_vende_lookup(html)
     listings = []
     for card in soup.select(SELECTOR_CARD):
         title_el = card.select_one(SELECTOR_TITLE)
@@ -66,6 +69,9 @@ def parse_listings(html: str) -> list[Listing]:
             except GeocodeError:
                 pass
 
+        numeric_id = _numeric_id_from_url(url)
+        chi_vende = chi_vende_lookup.get(numeric_id) if numeric_id else None
+
         listings.append(Listing(
             fonte="subito",
             external_id=external_id,
@@ -76,6 +82,7 @@ def parse_listings(html: str) -> list[Listing]:
             comune=comune,
             lat=lat,
             lon=lon,
+            chi_vende=chi_vende,
         ))
     return listings
 
@@ -109,6 +116,64 @@ def _extract_comune(card) -> str | None:
     # solo il nome del comune, senza sigla provincia, per un geocoding pulito.
     comune = raw.split("(")[0].strip()
     return comune or None
+
+
+def _parse_next_data(html: str) -> dict | None:
+    soup = BeautifulSoup(html, "html.parser")
+    tag = soup.find("script", id="__NEXT_DATA__")
+    if not tag or not tag.string:
+        return None
+    try:
+        return json.loads(tag.string)
+    except json.JSONDecodeError:
+        return None
+
+
+def _find_ads_list(node):
+    """Cerca ricorsivamente la lista di oggetti annuncio dentro __NEXT_DATA__.
+
+    Non si assume il percorso esatto delle chiavi (es. props.pageProps...items.
+    originalList): la struttura di Next.js puo' variare tra categorie/pagine.
+    Si riconosce la lista giusta dalla forma degli elementi: dict con sia
+    "urn" che "advertiser", che e' la firma stabile di un oggetto annuncio
+    verificata su fixtures/subito_sample.html.
+    """
+    if isinstance(node, list):
+        if node and all(isinstance(item, dict) and "urn" in item and "advertiser" in item for item in node):
+            return node
+        for item in node:
+            found = _find_ads_list(item)
+            if found is not None:
+                return found
+    elif isinstance(node, dict):
+        for value in node.values():
+            found = _find_ads_list(value)
+            if found is not None:
+                return found
+    return None
+
+
+def _build_chi_vende_lookup(html: str) -> dict[str, str]:
+    data = _parse_next_data(html)
+    if not data:
+        return {}
+    ads = _find_ads_list(data) or []
+    lookup = {}
+    for ad in ads:
+        match = re.search(r":list:(\d+)$", ad.get("urn", ""))
+        if not match:
+            continue
+        company = ad.get("advertiser", {}).get("company")
+        if company is True:
+            lookup[match.group(1)] = "agenzia"
+        elif company is False:
+            lookup[match.group(1)] = "privato"
+    return lookup
+
+
+def _numeric_id_from_url(url: str) -> str | None:
+    match = re.search(r"-(\d+)\.htm$", url)
+    return match.group(1) if match else None
 
 
 def _parse_price(text: str) -> int:
