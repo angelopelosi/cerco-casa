@@ -1,9 +1,14 @@
-from . import db, subito, pvp_giustizia
+from . import db, subito, pvp_giustizia, astegiudiziarie, asteimmobili, immobiliare, idealista, portaleaste
 from .fetch import fetch_html
 
 PORTAL_MODULES = {
     "subito": subito,
     "pvp_giustizia": pvp_giustizia,
+    "astegiudiziarie": astegiudiziarie,
+    "asteimmobili": asteimmobili,
+    "immobiliare": immobiliare,
+    "idealista": idealista,
+    "portaleaste": portaleaste,
 }
 
 # Portali la cui unica ricerca non copre sia affitto che vendita: una fetch
@@ -11,6 +16,8 @@ PORTAL_MODULES = {
 # tipo e sempre "asta").
 PORTAL_TIPI = {
     "subito": ("affitto", "vendita"),
+    "immobiliare": ("affitto", "vendita"),
+    "idealista": ("affitto", "vendita"),
 }
 
 def _search_urls(module, portale: str, centro_nome: str) -> list[str]:

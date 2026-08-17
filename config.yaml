@@ -6,6 +6,15 @@ raggio_km: 20
 portali_attivi:
   - subito
   - pvp_giustizia
+  - astegiudiziarie
+  - asteimmobili
+  - portaleaste
+  # immobiliare, idealista: NON attivi. Task 8/9 Step 0 ha rilevato un blocco
+  # anti-bot DataDome su entrambi (vedi scraper/immobiliare.py,
+  # scraper/idealista.py, task-8-report.md, task-9-report.md) — i moduli
+  # sono implementati e registrati in PORTAL_MODULES/PORTAL_TIPI ma contro
+  # fixture sintetiche, non verificate contro il markup reale. Aggiungere
+  # qui solo dopo una riverifica manuale dell'accesso al sito.
 email:
   destinatari:
     - angelopelosi1995@gmail.com

@@ -52,11 +52,37 @@ def test_run_all_skips_unregistered_portals(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(run_all_module.subito, "parse_listings", lambda html: [])
     monkeypatch.setattr(run_all_module.pvp_giustizia, "parse_listings", lambda html: [])
 
-    config = {"portali_attivi": ["immobiliare"], "centro": {"nome": "Jesi"}}
+    # "immobiliare" e' stato registrato in PORTAL_MODULES dalla Task 11 (ma
+    # tenuto fuori da portali_attivi in config.yaml per il blocco anti-bot,
+    # vedi scraper/immobiliare.py) — non e' piu' un esempio valido di portale
+    # non registrato. Uso un nome inesistente per testare lo skip.
+    config = {"portali_attivi": ["portale_inesistente"], "centro": {"nome": "Jesi"}}
     run_all_module.run_all(config, db_path)
 
     captured = capsys.readouterr()
-    assert "immobiliare" in captured.out
+    assert "portale_inesistente" in captured.out
+
+
+def test_run_all_registers_all_phase2_portals():
+    for nome in ("astegiudiziarie", "asteimmobili", "immobiliare", "idealista", "portaleaste"):
+        assert nome in run_all_module.PORTAL_MODULES
+
+def test_run_all_fetches_immobiliare_and_idealista_once_per_tipo(tmp_path, monkeypatch):
+    db_path = str(tmp_path / "test.db")
+    fetched_urls = []
+
+    def fake_fetch(url, wait_selector=None, **kwargs):
+        fetched_urls.append(url)
+        return FAKE_HTML
+
+    monkeypatch.setattr(run_all_module, "fetch_html", fake_fetch)
+    for modulo in run_all_module.PORTAL_MODULES.values():
+        monkeypatch.setattr(modulo, "parse_listings", lambda html: [])
+
+    config = {"portali_attivi": ["immobiliare", "idealista"], "centro": {"nome": "Jesi"}}
+    run_all_module.run_all(config, db_path)
+
+    assert len(fetched_urls) == 4  # 2 tipi x 2 portali
 
 def test_run_all_marks_previously_seen_listings_as_removed_when_absent(tmp_path, monkeypatch):
     db_path = str(tmp_path / "test.db")
