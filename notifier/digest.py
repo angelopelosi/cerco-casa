@@ -12,7 +12,9 @@ def build_digest_html(listings: list[dict], template_path: str = "notifier/email
         rows = "<p>Nessun nuovo annuncio questa settimana.</p>"
     else:
         rows = "".join(
-            f'<li><a href="{escape(l["url"])}">{escape(l["titolo"])}</a> — {escape(l["comune"] or "")}, {l["prezzo"]}€ ({escape(l["fonte"])})</li>'
+            f'<li><a href="{escape(l["url"])}">{escape(l["titolo"])}</a> — '
+            f'{escape(l["comune"] or "")}, {l["prezzo"]}€ ({escape(l["fonte"])}'
+            f'{", " + escape(l["chi_vende"]) if l.get("chi_vende") else ""})</li>'
             for l in listings
         )
     return template.replace("{{LISTINGS}}", rows).replace("{{COUNT}}", str(len(listings)))

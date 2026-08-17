@@ -65,3 +65,23 @@ def test_build_digest_html_handles_missing_comune(tmp_path):
     ]
     html = digest.build_digest_html(listings, template_path=str(template_path))
     assert "Lotto n. 1" in html
+
+def test_build_digest_html_includes_chi_vende_when_present(tmp_path):
+    template_path = tmp_path / "template.html"
+    template_path.write_text(TEMPLATE)
+    listings = [
+        {"titolo": "Bilocale", "comune": "Jesi", "prezzo": 500, "fonte": "subito",
+         "url": "https://example.com/1", "chi_vende": "agenzia"}
+    ]
+    html = digest.build_digest_html(listings, template_path=str(template_path))
+    assert "agenzia" in html
+
+def test_build_digest_html_omits_chi_vende_when_absent(tmp_path):
+    template_path = tmp_path / "template.html"
+    template_path.write_text(TEMPLATE)
+    listings = [
+        {"titolo": "Lotto n. 1", "comune": "Jesi", "prezzo": 1000, "fonte": "pvp_giustizia",
+         "url": "https://example.com/1", "chi_vende": None}
+    ]
+    html = digest.build_digest_html(listings, template_path=str(template_path))
+    assert "Lotto n. 1" in html
