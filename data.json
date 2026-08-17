@@ -22,7 +22,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "6f7f801bcd900054",
@@ -47,7 +48,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "41003c972143ce4a",
@@ -72,7 +74,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "b3105ce25e905df9",
@@ -97,7 +100,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "53a336e71ba39e0e",
@@ -122,7 +126,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "56981576d5a6a1f5",
@@ -147,7 +152,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "8bcadf7d43edcf5c",
@@ -172,7 +178,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "14981627c856ff01",
@@ -197,7 +204,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "1d47638ccf75d952",
@@ -222,7 +230,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "994f6e9d20a68d07",
@@ -247,7 +256,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "781265539e1007c4",
@@ -272,7 +282,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "dfbf464b7fbbff8b",
@@ -297,7 +308,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "fd330fea9af7065f",
@@ -322,7 +334,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "45b7f897cf0377ef",
@@ -347,7 +360,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "aa9300c764af1bb8",
@@ -372,7 +386,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "fe6c1c9c8a4adf51",
@@ -381,7 +396,7 @@
     "tipo": "affitto",
     "categoria": "residenziale",
     "titolo": "Ufficio Jesi",
-    "prezzo": 550,
+    "prezzo": 495,
     "superficie_mq": null,
     "locali": null,
     "comune": "Jesi",
@@ -397,7 +412,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "3adeea40c481cff5",
@@ -422,7 +438,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "e043c5a0d0ebfed3",
@@ -447,7 +464,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "f1e7f28f94570118",
@@ -472,7 +490,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "67fcac1601d63693",
@@ -497,7 +516,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "6a6bd2f5b6626c2f",
@@ -522,7 +542,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "46b871c580477f5d",
@@ -547,7 +568,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "656f80388b2a6fff",
@@ -572,7 +594,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "9cbe5e08750ca05f",
@@ -597,7 +620,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "f87b266c3d7f4b88",
@@ -622,7 +646,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "17ed11bba7731c7f",
@@ -647,7 +672,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "753afce40d28c4f0",
@@ -672,7 +698,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "be1405b31be86bea",
@@ -697,7 +724,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "a4a85e959c4f20c3",
@@ -722,7 +750,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "8be29cf93da6437d",
@@ -747,7 +776,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "53d3af81edc28b81",
@@ -772,7 +802,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "c312ddf88747c3e7",
@@ -797,7 +828,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "27b16526db300419",
@@ -822,7 +854,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "027103d790cda7ae",
@@ -847,7 +880,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "ee53fa548da109f6",
@@ -872,7 +906,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "4419fcc3973c3f85",
@@ -897,7 +932,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "51e5c6ca08d1f212",
@@ -922,7 +958,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "23e5929c751c207b",
@@ -947,7 +984,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "bcf09d5590dd3a46",
@@ -972,7 +1010,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "1fadf27e17273392",
@@ -997,7 +1036,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "82bcd1c455d81461",
@@ -1022,7 +1062,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "9a87dfee6c73d624",
@@ -1047,7 +1088,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "946692654eb52d2e",
@@ -1072,7 +1114,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "3b7902ad7acfb7bc",
@@ -1097,7 +1140,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "aafcf86334bca6c8",
@@ -1122,7 +1166,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "5067c761d0e09559",
@@ -1147,7 +1192,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "privato"
   },
   {
     "id": "dc3fbb1b10ede1d9",
@@ -1172,7 +1218,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "d4de10ad961bb435",
@@ -1197,7 +1244,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "2fe8fd24ba40923e",
@@ -1222,7 +1270,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "0623f136b2ebd196",
@@ -1247,7 +1296,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "bbff9dca6b418fc1",
@@ -1272,7 +1322,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "49222dbddea016c8",
@@ -1297,7 +1348,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "01dba645cf5d2779",
@@ -1322,7 +1374,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "0d445abadc335b6d",
@@ -1347,7 +1400,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": null,
-    "offerta_minima": null
+    "offerta_minima": null,
+    "chi_vende": "agenzia"
   },
   {
     "id": "e717a79aa055718e",
@@ -1372,7 +1426,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": "11/05/2018 15:30",
-    "offerta_minima": 83346
+    "offerta_minima": 83346,
+    "chi_vende": null
   },
   {
     "id": "f837016a85db121f",
@@ -1397,7 +1452,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": "25/05/2018 15:30",
-    "offerta_minima": 150000
+    "offerta_minima": 150000,
+    "chi_vende": null
   },
   {
     "id": "76443a090da51f6f",
@@ -1422,7 +1478,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": "25/05/2018 15:30",
-    "offerta_minima": 31995
+    "offerta_minima": 31995,
+    "chi_vende": null
   },
   {
     "id": "f532faed798792a6",
@@ -1447,7 +1504,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": "08/06/2018 15:30",
-    "offerta_minima": 284475
+    "offerta_minima": 284475,
+    "chi_vende": null
   },
   {
     "id": "b51b47e7484bbe39",
@@ -1472,7 +1530,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": "11/12/2018 10:40",
-    "offerta_minima": 44019
+    "offerta_minima": 44019,
+    "chi_vende": null
   },
   {
     "id": "66f615b2269af5ae",
@@ -1497,7 +1556,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": "11/12/2018 10:40",
-    "offerta_minima": 54776
+    "offerta_minima": 54776,
+    "chi_vende": null
   },
   {
     "id": "59cba5358261637d",
@@ -1522,7 +1582,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": "23/01/2019 10:40",
-    "offerta_minima": 43740
+    "offerta_minima": 43740,
+    "chi_vende": null
   },
   {
     "id": "8897b5a3dc3be50b",
@@ -1547,7 +1608,8 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": "20/02/2019 09:00",
-    "offerta_minima": 25734
+    "offerta_minima": 25734,
+    "chi_vende": null
   },
   {
     "id": "4a86d79db95eaabe",
@@ -1572,6 +1634,371 @@
     "stato_annuncio": "attivo",
     "tribunale": null,
     "data_asta": "20/02/2019 09:00",
-    "offerta_minima": 47250
+    "offerta_minima": 47250,
+    "chi_vende": null
+  },
+  {
+    "id": "a969a9f868314207",
+    "fonte": "astegiudiziarie",
+    "external_id": "l2331804-p1313086",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Fabbricato",
+    "prezzo": 231975,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astegiudiziarie.it/vendita-asta-fabbricato-civile-jesi-via-mazzangrugno-18-60035-jesi-an-italia-l2331804-p1313086",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "15/10/2026",
+    "offerta_minima": null,
+    "chi_vende": null
+  },
+  {
+    "id": "92c874193e462d6e",
+    "fonte": "astegiudiziarie",
+    "external_id": "l2331791-p1313077",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Fabbricato",
+    "prezzo": 176000,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astegiudiziarie.it/vendita-asta-fabbricato-civile-jesi-via-roncaglia-12-60035-jesi-an-italia-l2331791-p1313077",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "14/10/2026",
+    "offerta_minima": null,
+    "chi_vende": null
+  },
+  {
+    "id": "15dfa6b31477c7de",
+    "fonte": "astegiudiziarie",
+    "external_id": "l2328051-p1310736",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Abitazione in villini",
+    "prezzo": 668826,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astegiudiziarie.it/vendita-asta-villetta-jesi-via-s-marcello-104-106-60035-jesi-an-italia-l2328051-p1310736",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "08/10/2026",
+    "offerta_minima": null,
+    "chi_vende": null
+  },
+  {
+    "id": "8767310f43c22469",
+    "fonte": "astegiudiziarie",
+    "external_id": "l2327231-p1310167",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Abitazione di tipo popolare",
+    "prezzo": 70000,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astegiudiziarie.it/vendita-asta-appartamento-jesi-via-roma-22-60035-jesi-an-italia-l2327231-p1310167",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "15/09/2026",
+    "offerta_minima": null,
+    "chi_vende": null
+  },
+  {
+    "id": "32edcffe025522c8",
+    "fonte": "astegiudiziarie",
+    "external_id": "l2327230-p1310167",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Abitazione di tipo popolare",
+    "prezzo": 20000,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astegiudiziarie.it/vendita-asta-appartamento-jesi-via-roma-22-60035-jesi-an-italia-l2327230-p1310167",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "15/09/2026",
+    "offerta_minima": null,
+    "chi_vende": null
+  },
+  {
+    "id": "10fa2066b6e49a84",
+    "fonte": "astegiudiziarie",
+    "external_id": "l2326378-p1309716",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Abitazione di tipo civile",
+    "prezzo": 91875,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astegiudiziarie.it/vendita-asta-appartamento-jesi-via-luigi-mercantini-8-60035-jesi-an-italia-l2326378-p1309716",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "17/09/2026",
+    "offerta_minima": null,
+    "chi_vende": null
+  },
+  {
+    "id": "78343c9a0664ee42",
+    "fonte": "astegiudiziarie",
+    "external_id": "l2326352-p1309716",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Abitazione di tipo civile",
+    "prezzo": 91875,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astegiudiziarie.it/vendita-asta-appartamento-jesi-via-luigi-mercantini-8-60035-jesi-an-italia-l2326352-p1309716",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "17/09/2026",
+    "offerta_minima": null,
+    "chi_vende": null
+  },
+  {
+    "id": "24547cc5216eaa7b",
+    "fonte": "astegiudiziarie",
+    "external_id": "l2324123-p1308339",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Appartamento",
+    "prezzo": 75126,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astegiudiziarie.it/vendita-asta-appartamento-jesi-via-piemonte-2-60035-jesi-an-italia-l2324123-p1308339",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "30/07/2026",
+    "offerta_minima": null,
+    "chi_vende": null
+  },
+  {
+    "id": "96775ddc7ae4de8b",
+    "fonte": "astegiudiziarie",
+    "external_id": "l2314166-p1302540",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Appartamento",
+    "prezzo": 225000,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astegiudiziarie.it/vendita-asta-appartamento-jesi-via-mario-saveri-60035-jesi-an-italia-l2314166-p1302540",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "09/06/2026",
+    "offerta_minima": null,
+    "chi_vende": null
+  },
+  {
+    "id": "c844b05a1195ffad",
+    "fonte": "asteimmobili",
+    "external_id": "B2428933",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Abitazione di tipo civile",
+    "prezzo": 231975,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astalegale.net/Aste/Detail/B2428933-Abitazione-di-tipo-civile-Via-Mazzangrugno-18-60035-Jesi-AN-Italia-Jesi",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "15/10/2026",
+    "offerta_minima": 173982,
+    "chi_vende": null
+  },
+  {
+    "id": "5d0fc42ac584f13c",
+    "fonte": "asteimmobili",
+    "external_id": "B2425817",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Abitazione di tipo civile",
+    "prezzo": 91875,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astalegale.net/Aste/Detail/B2425817-Abitazione-di-tipo-civile-Via-Luigi-Mercantini-8-60035-Jesi-AN-Italia-Jesi",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "17/09/2026",
+    "offerta_minima": 68906,
+    "chi_vende": null
+  },
+  {
+    "id": "ac5b443f5345862e",
+    "fonte": "asteimmobili",
+    "external_id": "B2425818",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Abitazione di tipo civile",
+    "prezzo": 91875,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astalegale.net/Aste/Detail/B2425818-Abitazione-di-tipo-civile-Via-Luigi-Mercantini-8-60035-Jesi-AN-Italia-Jesi",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "17/09/2026",
+    "offerta_minima": 68906,
+    "chi_vende": null
+  },
+  {
+    "id": "99ff6b45dc79d94b",
+    "fonte": "asteimmobili",
+    "external_id": "B2424836",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Abitazione di tipo civile",
+    "prezzo": 20000,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astalegale.net/Aste/Detail/B2424836-Abitazione-di-tipo-civile-Via-Roma-22-60035-Jesi-AN-Italia-Jesi",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "15/09/2026",
+    "offerta_minima": 15000,
+    "chi_vende": null
+  },
+  {
+    "id": "fc6b3db3e2c989cb",
+    "fonte": "asteimmobili",
+    "external_id": "B2425485",
+    "tipo": "asta",
+    "categoria": "residenziale",
+    "titolo": "Abitazione di tipo civile",
+    "prezzo": 70000,
+    "superficie_mq": null,
+    "locali": null,
+    "comune": "Jesi",
+    "lat": 43.5233745,
+    "lon": 13.2560171,
+    "stato_disponibilita": null,
+    "data_disponibilita": null,
+    "arredato": "non_specificato",
+    "url": "https://www.astalegale.net/Aste/Detail/B2425485-Abitazione-di-tipo-civile-Via-Roma-22-60035-Jesi-AN-Italia-Jesi",
+    "data_pubblicazione": null,
+    "data_first_seen": "2026-08-17",
+    "data_last_seen": "2026-08-17",
+    "stato_annuncio": "attivo",
+    "tribunale": "Tribunale di Ancona",
+    "data_asta": "15/09/2026",
+    "offerta_minima": 52500,
+    "chi_vende": null
   }
 ]
